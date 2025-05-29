@@ -1,5 +1,7 @@
 import { Geist } from "next/font/google";
 import "./globals.css";
+import {Toaster} from "@/components/ui/toaster";
+import ToastFromQuery from "@/components/toast/toastFromQuery";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -7,8 +9,8 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "Next.js and Supabase Starter Kit",
-  description: "The fastest way to build apps with Next.js and Supabase",
+  title: "Event-it",
+  description: "To easily create, find and manage events.",
 };
 
 const geistSans = Geist({
@@ -25,6 +27,8 @@ export default function RootLayout({
     <html lang="en" className={geistSans.className} suppressHydrationWarning>
       <body className="">
       {children}
+      <ToastFromQuery/>
+      <Toaster/>
       </body>
     </html>
   );

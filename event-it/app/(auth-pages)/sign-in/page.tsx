@@ -1,41 +1,53 @@
-import { signInAction } from "@/app/actions";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import Link from "next/link";
+import {signInAction} from "@/app/(auth-pages)/actions";
+import {Input} from "@/components/ui/input";
+import {Label} from "@/components/ui/label";
 import {Button} from "@/components/ui/button";
+import {AuthCard} from "@/components/auth/authCard";
+import {getAuthMessage} from "@/utils/auth/authMessage";
 
-export default async function Login() {
-  return (
-    <form className="flex-1 flex flex-col min-w-64">
-      <h1 className="text-2xl font-medium">Sign in</h1>
-      <p className="text-sm text-foreground">
-        Don't have an account?{" "}
-        <Link className="text-foreground font-medium underline" href="/sign-up">
-          Sign up
-        </Link>
-      </p>
-      <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
-        <Label htmlFor="email">Email</Label>
-        <Input name="email" placeholder="you@example.com" required />
-        <div className="flex justify-between items-center">
-          <Label htmlFor="password">Password</Label>
-          <Link
-            className="text-xs text-foreground underline"
-            href="/forgot-password"
-          >
-            Forgot Password?
-          </Link>
-        </div>
-        <Input
-          type="password"
-          name="password"
-          placeholder="Your password"
-          required
-        />
-        <Button formAction={signInAction}>
-          Sign in
-        </Button>
-      </div>
-    </form>
-  );
+export default async function SignInPage({
+                                             searchParams,
+                                         }: {
+    searchParams?: Promise<{ [key: string]: string | string[] }>;
+}) {
+    const message = getAuthMessage(await searchParams);
+    const redirectTo = (await searchParams)?.redirect ?? "/";
+
+    return (
+        <AuthCard
+            title="Sign in"
+            description={
+                <>
+                    Dont have an account yet?
+                    <Button variant="link" asChild>
+                        <a href="/sign-up">Sign up</a>
+                    </Button>
+                </>
+            }
+            formAction={signInAction}
+            submitLabel="Sign in"
+            message={message}
+        >
+            <Label htmlFor="email">Email</Label>
+            <Input name="email" placeholder="you@example.com" required/>
+
+            <div className={"flex flex-col"}>
+                <div className="flex justify-between items-center">
+                    <Label htmlFor="password">Password</Label>
+                    <Button variant="link" asChild>
+                        <a href={"/forgot-password"}>Forgot password?</a>
+                    </Button>
+                </div>
+                <Input
+                    type="password"
+                    name="password"
+                    placeholder="Your password"
+                    minLength={6}
+                    required
+                />
+
+            </div>
+            <input type="hidden" name="redirect" value={redirectTo}/>
+        </AuthCard>
+    );
 }
