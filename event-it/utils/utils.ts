@@ -24,3 +24,6 @@ export function encodedRedirect(
 
   return redirect(`${path}?${params.toString()}`);
 }
+
+export const baseUrl = process.env.NODE_ENV === "development" ?
+    "http://localhost:3000" : process.env.VERCEL_URL!;
