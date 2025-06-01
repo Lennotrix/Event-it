@@ -2,6 +2,7 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import {Toaster} from "@/components/ui/toaster";
 import ToastFromQuery from "@/components/toast/toastFromQuery";
+import {Suspense} from "react";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -27,7 +28,9 @@ export default function RootLayout({
     <html lang="en" className={geistSans.className} suppressHydrationWarning>
       <body className="">
       {children}
-      <ToastFromQuery/>
+      <Suspense fallback={null} >
+        <ToastFromQuery/>
+      </Suspense>
       <Toaster/>
       </body>
     </html>
