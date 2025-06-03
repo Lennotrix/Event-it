@@ -6,7 +6,11 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get("code");
   const errorCode = requestUrl.searchParams.get("error_code");
   const errorDescription = requestUrl.searchParams.get("error_description");
-  const redirect = request.nextUrl.clone()
+  const redirect = request.nextUrl.clone();
+
+  redirect.searchParams.delete("code");
+  redirect.searchParams.delete("error_code");
+  redirect.searchParams.delete("error_description");
 
   if (errorCode && errorDescription) {
     redirect.pathname = '/forgot-password';
