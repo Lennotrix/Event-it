@@ -1,9 +1,11 @@
 import { Geist } from "next/font/google";
 import "./globals.css";
-import {Toaster} from "@/components/ui/toaster";
+import { Toaster } from "@/components/ui/toaster";
 import ToastFromQuery from "@/components/toast/toastFromQuery";
-import {Suspense} from "react";
-import {PopupProvider} from "@/components/provider/popupProvider";
+import { Suspense } from "react";
+import { PopupProvider } from "@/components/provider/popupProvider";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import AppSidebar from "@/components/sidebar/app-sidebar";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -28,13 +30,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={geistSans.className} suppressHydrationWarning>
       <body className="w-screen">
-      <PopupProvider>
-        {children}
-      </PopupProvider>
-      <Suspense fallback={null} >
-        <ToastFromQuery/>
-      </Suspense>
-      <Toaster/>
+        <PopupProvider>
+          <div className="flex h-screen">
+            <SidebarProvider>
+              <main className="flex-1 p-4 overflow-auto">{children}</main>
+            </SidebarProvider>
+          </div>
+          <Suspense fallback={null}>
+            <ToastFromQuery />
+          </Suspense>
+          <Toaster />
+        </PopupProvider>
       </body>
     </html>
   );
