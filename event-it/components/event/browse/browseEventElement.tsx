@@ -46,7 +46,6 @@ export function Eventelement({event,children}: { event: EventWithVenue,children:
                 </CardTitle>
                 <CardDescription className="">
                     {formatGermanDate(event.start_time)}<br/>
-                    {event.venues?.name}
                 </CardDescription>
             </CardHeader>
             <CardContent className="">
