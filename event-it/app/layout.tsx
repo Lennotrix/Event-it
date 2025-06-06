@@ -1,9 +1,9 @@
 import { Geist } from "next/font/google";
 import "./globals.css";
-import {Toaster} from "@/components/ui/toaster";
 import ToastFromQuery from "@/components/toast/toastFromQuery";
 import {Suspense} from "react";
 import {PopupProvider} from "@/components/provider/popupProvider";
+import {Toaster} from "sonner";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -27,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={geistSans.className} suppressHydrationWarning>
-      <body className="w-screen">
+      <body className="">
       <PopupProvider>
         {children}
       </PopupProvider>

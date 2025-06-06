@@ -2,14 +2,13 @@
 
 import { useEffect } from "react";
 import {usePathname, useSearchParams} from "next/navigation";
-import {useToast} from "@/hooks/use-toast";
+import {toast} from "sonner";
 
 const AUTH_PATHS = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password"];
 
 export default function ToastFromQuery() {
     const searchParams = useSearchParams();
     const pathname = usePathname();
-    const { toast } = useToast();
 
     useEffect(() => {
         if (AUTH_PATHS.includes(pathname)) return;
@@ -18,18 +17,14 @@ export default function ToastFromQuery() {
         const error = searchParams.get("error");
 
         if (success) {
-            toast({
-                title: "Success",
-                description: decodeURIComponent(success),
-                variant: "default",
+            toast.success("Erfolg", {
+                description: decodeURIComponent(success)
             });
         }
 
         if (error) {
-            toast({
-                title: "Error",
-                description: decodeURIComponent(error),
-                variant: "destructive",
+            toast.error("Fehler", {
+                description: decodeURIComponent(error)
             });
         }
     }, [searchParams, toast]);
