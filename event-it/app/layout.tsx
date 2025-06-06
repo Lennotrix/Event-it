@@ -1,10 +1,10 @@
 import { Geist } from "next/font/google";
 import "./globals.css";
-import {Toaster} from "@/components/ui/sonner";
 import ToastFromQuery from "@/components/toast/toastFromQuery";
 import {Suspense} from "react";
 import {PopupProvider} from "@/components/provider/popupProvider";
 import {NotificationListener} from "@/components/notifications/notificationListener";
+import {Toaster} from "sonner";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
