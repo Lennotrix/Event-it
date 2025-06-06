@@ -8,19 +8,20 @@ import {
   SidebarMenuButton,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, Ticket, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 export default function AppSidebar() {
   const [groups, setGroups] = useState<
     { id: string; name: string; description: string | null }[]
   >([]);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchGroups = async () => {
       const supabase = createClient();
-
       const {
         data: { user },
         error: userError,
@@ -54,36 +55,21 @@ export default function AppSidebar() {
   }, []);
 
   return (
-    <Sidebar className="h-screen flex flex-col items-center py-6">
-      {/* Logo */}
-      <SidebarHeader>
-        <div className="mb-6">
-          <img src="/main.png" alt="Logo" className="w-8 h-8" />
-        </div>
-      </SidebarHeader>
+    <Sidebar>
+      <SidebarHeader></SidebarHeader>
 
-      {/* Hauptmenü */}
       <SidebarContent>
         <SidebarGroup>
-          <div className="flex flex-col items-center space-y-6">
-            <SidebarMenuButton className="flex items-center gap-2">
-              <CalendarDays className="h-6 w-6" />
-              <span>Kalendar</span>
-            </SidebarMenuButton>
-
-            <SidebarMenuButton className="flex items-center gap-2">
-              <Ticket className="h-6 w-6" />
-              <span>Events</span>
-            </SidebarMenuButton>
-          </div>
-        </SidebarGroup>
-
-        {/* Gruppenliste */}
-        <SidebarGroup>
-          <div className="flex-1 mt-10 flex flex-col items-center space-y-3 overflow-auto">
+          <div className="flex-1 mt-4 flex flex-col items-center space-y-3 overflow-auto">
             {groups.map((group) => (
-              <SidebarMenuButton key={group.id} title={group.name}>
-                {group.name}
+              <SidebarMenuButton
+                key={group.id}
+                title={group.name}
+                onClick={() =>
+                  router.push(`/freinds/groups/create/${group.id}`)
+                }
+              >
+                <span>{group.name}</span>
               </SidebarMenuButton>
             ))}
 
@@ -91,6 +77,7 @@ export default function AppSidebar() {
               variant="ghost"
               size="icon"
               className="w-10 h-10 rounded-full"
+              onClick={() => router.push("/freinds/groups/create")} // Dein Zielpfad hier
             >
               <Plus className="h-5 w-5" />
             </Button>
