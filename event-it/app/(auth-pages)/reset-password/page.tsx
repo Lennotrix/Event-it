@@ -24,10 +24,10 @@ export default async function ForgotPassword({
             message={message}
         >
             <Label htmlFor="password">Password</Label>
-            <Input name="password" placeholder="Your Password" type={"password"} required minLength={6}/>
+            <Input name="password" placeholder="Your Password" type="password" required minLength={6}/>
 
             <Label htmlFor="confirmPassword">Confirm your password</Label>
-            <Input name="confirmPassword" placeholder="Your Password" type={"password"} required minLength={6}/>
+            <Input name="confirmPassword" placeholder="Your Password" type="password" required minLength={6}/>
         </AuthCard>
     );
 }
