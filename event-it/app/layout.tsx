@@ -3,6 +3,7 @@ import "./globals.css";
 import ToastFromQuery from "@/components/toast/toastFromQuery";
 import {Suspense} from "react";
 import {PopupProvider} from "@/components/provider/popupProvider";
+import {NotificationListener} from "@/components/notifications/notificationListener";
 import {Toaster} from "sonner";
 
 const defaultUrl = process.env.VERCEL_URL
@@ -27,13 +28,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={geistSans.className} suppressHydrationWarning>
-      <body className="">
+      <body className="w-screen">
       <PopupProvider>
         {children}
       </PopupProvider>
       <Suspense fallback={null} >
         <ToastFromQuery/>
       </Suspense>
+      <NotificationListener/>
       <Toaster/>
       </body>
     </html>

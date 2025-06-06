@@ -3,10 +3,10 @@
 import { createClient } from "@/utils/supabase/client";
 import { Label } from "@/components/ui/label";
 import { useEffect, useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Event } from "@/types/exposed";
 import {DialogFooter, DialogTitle} from "@/components/ui/dialog";
+import {toast} from "sonner";
 
 export default function PublishEventConfirm({
                                                 eventId,
@@ -16,7 +16,6 @@ export default function PublishEventConfirm({
     closeAction: () => void
 }) {
     const [event, setEvent] = useState<Event | null>(null);
-    const { toast } = useToast();
 
     useEffect(() => {
         async function fetchEvent() {
@@ -29,10 +28,8 @@ export default function PublishEventConfirm({
 
             if (error) {
                 console.error("Error fetching event:", error);
-                toast({
-                    title: "Fehler",
-                    description: "Beim Laden des Events ist ein Fehler aufgetreten.",
-                    variant: "destructive",
+                toast.error("Fehler",{
+                    description: "Beim Laden des Events ist ein Fehler aufgetreten."
                 });
                 return;
             }
@@ -54,18 +51,14 @@ export default function PublishEventConfirm({
 
         if (error) {
             console.error("Error publishing event:", error);
-            toast({
-                title: "Fehler",
-                description: "Beim Veröffentlichen des Events ist ein Fehler aufgetreten.",
-                variant: "destructive",
+            toast.error("Fehler",{
+                description: "Beim Veröffentlichen des Events ist ein Fehler aufgetreten."
             });
             return;
         }
 
-        toast({
-            title: "Erfolg",
-            description: "Das Event wurde erfolgreich veröffentlicht.",
-            variant: "default",
+        toast.success("Erfolgreich",{
+            description: "Das Event wurde erfolgreich veröffentlicht."
         });
 
         closeAction();
