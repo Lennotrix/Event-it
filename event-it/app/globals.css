@@ -80,3 +80,8 @@
     @apply bg-background text-foreground;
   }
 }
+@layer components {
+  [data-sonner-toast] button[data-cancel] {
+    @apply text-destructive font-medium !important;
+  }
+}
