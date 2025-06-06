@@ -17,16 +17,14 @@ export default function ToastFromQuery() {
         const error = searchParams.get("error");
 
         if (success) {
-            toast.success("Success",{
-                description: decodeURIComponent(success),
-
+            toast.success("Erfolg", {
+                description: decodeURIComponent(success)
             });
         }
 
         if (error) {
-            toast.error("Success",{
-                description: decodeURIComponent(error),
-
+            toast.error("Fehler", {
+                description: decodeURIComponent(error)
             });
         }
     }, [searchParams, toast]);
