@@ -2,7 +2,7 @@ import { createClient } from "@/utils/supabase/client";
 import { Accept, Decline } from "@/utils/invitation/client";
 import { toast } from "sonner";
 import {useRealtimeListeners} from "@/hooks/realtime/useRealtimeListener";
-import {Invitation} from "@/types/exposed";
+import {EventInvitation} from "@/types/exposed";
 
 export function useInvitationListener(userId: string | undefined) {
     const supabase = createClient();
@@ -17,7 +17,7 @@ export function useInvitationListener(userId: string | undefined) {
                     event: "INSERT",
                     filter: `user_id=eq.${userId}`,
                     handler: async (payload) => {
-                        const invitation = payload.new as Invitation;
+                        const invitation = payload.new as EventInvitation;
                         if (!invitation.event_id) return;
 
                         const { data: event, error } = await supabase
