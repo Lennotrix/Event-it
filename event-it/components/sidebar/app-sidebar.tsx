@@ -12,46 +12,29 @@ import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import {FirendGroup} from "@/types/exposed";
+import useUpdateSidebar from "@/hooks/realtime/useUpdateSidebar";
+import {useSession} from "@/hooks/useSession";
+import {User} from "@supabase/auth-js";
 
 export default function AppSidebar() {
-  const [groups, setGroups] = useState<
-    { id: string; name: string; description: string | null }[]
-  >([]);
+  const [groups, setGroups] = useState<FirendGroup[]>([]);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
+  useUpdateSidebar({setGroups, userId: user?.id});
 
   useEffect(() => {
-    const fetchGroups = async () => {
-      const supabase = createClient();
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+    const supabase = createClient();
 
-      if (userError || !user) {
-        console.error("User nicht gefunden:", userError);
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from("friend_group_members")
-        .select("group_id, friend_groups(name, description)")
-        .eq("user_id", user.id);
-
+    const fetchUser = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
       if (error) {
-        console.error("Fehler beim Laden der Gruppen:", error);
+        console.error("Fehler beim Abrufen des Benutzers:", error);
         return;
       }
-
-      const formatted = data.map((entry) => ({
-        id: entry.group_id,
-        name: entry.friend_groups.name,
-        description: entry.friend_groups.description,
-      }));
-
-      setGroups(formatted);
+      setUser(user);
     };
-
-    fetchGroups();
+    fetchUser().catch(console.error);
   }, []);
 
   return (
@@ -61,15 +44,15 @@ export default function AppSidebar() {
       <SidebarContent>
         <SidebarGroup>
           <div className="flex-1 mt-4 flex flex-col items-center space-y-3 overflow-auto">
-            {groups.map((group) => (
+            {groups.map((group, index) => (
               <SidebarMenuButton
-                key={group.id}
-                title={group.name}
+                key={index}
+                title={group?.name || "Unbenannte Gruppe"}
                 onClick={() =>
                   router.push(`/friends/groups/${group.id}`)
                 }
               >
-                <span>{group.name}</span>
+                <span>{group?.name || "Unbekannte Gruppe"}</span>
               </SidebarMenuButton>
             ))}
 
