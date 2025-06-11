@@ -12,83 +12,55 @@ import { Plus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { useRouter } from "next/navigation";
+import {FirendGroup} from "@/types/exposed";
+import useUpdateSidebar from "@/hooks/realtime/useUpdateSidebar";
+import {useSession} from "@/hooks/useSession";
+import {User} from "@supabase/auth-js";
 
 export default function AppSidebar() {
-  const [groups, setGroups] = useState<
-    { id: string; name: string; description: string | null }[]
-  >([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [groups, setGroups] = useState<FirendGroup[]>([]);
+  const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
+  useUpdateSidebar({setGroups, userId: user?.id});
 
   useEffect(() => {
-    const fetchGroups = async () => {
-      const supabase = createClient();
-      const {
-        data: { user },
-        error: userError,
-      } = await supabase.auth.getUser();
+    const supabase = createClient();
 
-      if (userError || !user) {
-        setError("Fehler beim Laden des Benutzers.");
-        setLoading(false);
+    const fetchUser = async () => {
+      const { data: { user }, error } = await supabase.auth.getUser();
+      if (error) {
+        console.error("Fehler beim Abrufen des Benutzers:", error);
         return;
       }
-
-      const { data, error } = await supabase
-        .from("friend_group_members")
-        .select("group_id, friend_groups(name, description)")
-        .eq("user_id", user.id);
-
-      if (error) {
-        setError("Fehler beim Laden der Gruppen.");
-      } else {
-        const formatted = data.map((entry) => ({
-          id: entry.group_id,
-          name: entry.friend_groups.name,
-          description: entry.friend_groups.description,
-        }));
-        setGroups(formatted);
-      }
-      setLoading(false);
+      setUser(user);
     };
-
-    fetchGroups();
+    fetchUser().catch(console.error);
   }, []);
 
   return (
     <Sidebar>
-      <SidebarHeader />
+      <SidebarHeader></SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
-          <div className="flex-1 mt-4 flex flex-col items-center space-y-3 overflow-auto w-full">
-            {loading && (
-              <p className="text-sm text-muted-foreground">Lade Gruppen...</p>
-            )}
-            {error && <p className="text-sm text-red-500">{error}</p>}
-            {!loading && !error && groups.length === 0 && (
-              <p className="text-sm text-muted-foreground">
-                Keine Gruppen vorhanden
-              </p>
-            )}
-
-            {groups.map((group) => (
+          <div className="flex-1 mt-4 flex flex-col items-center space-y-3 overflow-auto">
+            {groups.map((group, index) => (
               <SidebarMenuButton
-                key={group.id}
-                title={group.name}
-                onClick={() => router.push(`/friends/groups/${group.id}`)}
-                className="w-full"
+                key={index}
+                title={group?.name || "Unbenannte Gruppe"}
+                onClick={() =>
+                  router.push(`/friends/groups/${group.id}`)
+                }
               >
-                {group.name}
+                <span>{group?.name || "Unbekannte Gruppe"}</span>
               </SidebarMenuButton>
             ))}
 
             <Button
               variant="ghost"
               size="icon"
-              className="w-10 h-10 rounded-full mt-2"
-              onClick={() => router.push("/friends/groups/create")}
+              className="w-10 h-10 rounded-full"
+              onClick={() => router.push("/friends/groups/create")} // Dein Zielpfad hier
             >
               <Plus className="h-5 w-5" />
             </Button>
