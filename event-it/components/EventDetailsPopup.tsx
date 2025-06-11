@@ -63,7 +63,7 @@ export default function EventDetailsPopup({
 
         // Deduplicate per user
         const dedup: Record<string, InviteInfo> = {}
-        invs.forEach(inv => {
+        invs?.forEach(inv => {
           const uid = inv.user_id!
           const st = inv.status!
           if (!dedup[uid] || priority[st] > priority[dedup[uid].status]) {
@@ -88,7 +88,7 @@ export default function EventDetailsPopup({
             .select('id, username, avatar_url')
             .in('id', ids)
           const pm: typeof profiles = {}
-          profs.forEach(p => { pm[p.id] = { username: p.username, avatar_url: p.avatar_url } })
+          profs?.forEach(p => { pm[p.id] = { username: p.username, avatar_url: p.avatar_url } })
           setProfiles(pm)
         }
       } catch (err) {
