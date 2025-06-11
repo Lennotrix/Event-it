@@ -1,33 +1,34 @@
 "use client";
 
 import {
-  NavigationMenu,
-  NavigationMenuItem,
-  NavigationMenuLink,
-  NavigationMenuList,
-} from "@/components/ui/navigation-menu";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
-import {Fragment, useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
-import {Avatar, AvatarImage} from "@/components/ui/avatar";
-import {Breadcrumbs} from "@/components/navigationMenu/breadcrumps";
-import {ThemeToggle} from "@/components/navigationMenu/themeToggle";
-import {Label} from "@/components/ui/label";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import { Breadcrumbs } from "@/components/navigationMenu/breadcrumps";
+import { ThemeToggle } from "@/components/navigationMenu/themeToggle";
+import { Label } from "@/components/ui/label";
+import EditUserPopup from "@/components/users/editUserPopup";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export default function TopNav() {
   const [userData, setUserData] = useState<{
+    id: string;
     username: string;
     avatar_url: string;
+    first_name?: string;
+    last_name?: string;
+    bio?: string;
   } | null>(null);
 
+  const [editOpen, setEditOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -40,14 +41,18 @@ export default function TopNav() {
       if (user) {
         const { data, error } = await supabase
           .from("profiles")
-          .select("username, avatar_url")
+          .select("id, username, avatar_url, first_name, last_name, bio")
           .eq("id", user.id)
           .single();
 
         if (!error && data) {
           setUserData({
+            id: data.id,
             username: data.username,
             avatar_url: data.avatar_url ?? "/fallback.png",
+            first_name: data.first_name || "",
+            last_name: data.last_name || "",
+            bio: data.bio || "",
           });
         }
       }
@@ -86,29 +91,49 @@ export default function TopNav() {
         <ThemeToggle />
 
         {userData && (
+          <>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className="">
+                <div>
                   <Avatar>
-                    <AvatarImage src={userData.avatar_url}></AvatarImage>
+                    <AvatarImage src={userData.avatar_url} />
                   </Avatar>
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 p-4">
-                <DropdownMenuItem className="text-sm text-muted-foreground" disabled>
-                  <Label>
-                    Eingeloggt als: {userData.username}
-                  </Label>
+                <DropdownMenuItem
+                  className="text-sm text-muted-foreground"
+                  disabled
+                >
+                  <Label>Eingeloggt als: {userData.username}</Label>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                    Profil bearbeiten (bald)
+                <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                  Profil bearbeiten
                 </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleLogout}>Ausloggen</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>
+                  Ausloggen
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            <Dialog open={editOpen} onOpenChange={setEditOpen}>
+              <DialogContent>
+                <EditUserPopup
+                  userId={userData.id}
+                  currentValues={{
+                    username: userData.username,
+                    avatar_url: userData.avatar_url,
+                    first_name: userData.first_name,
+                    last_name: userData.last_name,
+                    bio: userData.bio,
+                  }}
+                  onCloseAction={() => setEditOpen(false)}
+                />
+              </DialogContent>
+            </Dialog>
+          </>
         )}
       </div>
-
     </header>
   );
 }
