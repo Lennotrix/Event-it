@@ -13,10 +13,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import {Fragment, useEffect, useState} from "react";
 import { createClient } from "@/utils/supabase/client";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
+import {Avatar, AvatarImage} from "@/components/ui/avatar";
+import {Breadcrumbs} from "@/components/navigationMenu/breadcrumps";
+import {ThemeToggle} from "@/components/navigationMenu/themeToggle";
+import {Label} from "@/components/ui/label";
 
 export default function TopNav() {
   const [userData, setUserData] = useState<{
@@ -60,52 +64,51 @@ export default function TopNav() {
 
   return (
     <header className="w-full flex items-center justify-between p-4 border-b">
-      {/* Logo links */}
-      <div className="text-xl font-bold">
-        <Image src="/main.png" alt="Logo" width={75} height={75} />
+      <div className="flex items-center justify-between gap-4">
+        <div className="text-xl font-bold">
+          <Image src="/main.png" alt="Logo" width={55} height={55} />
+        </div>
+        <div className="hidden md:block">
+          <Breadcrumbs />
+        </div>
       </div>
 
-      {/* Mittlere Buttons */}
-      <div className="flex items-center gap-4">
-        <Button variant="outline" onClick={() => router.push("/kalender")}>
-          Kalendar
-        </Button>
-        <Button variant="outline" onClick={() => router.push("/events")}>
-          Events
-        </Button>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Button variant="outline" onClick={() => router.push("/kalender")}>
+            Kalendar
+          </Button>
+          <Button variant="outline" onClick={() => router.push("/events")}>
+            Events
+          </Button>
+        </div>
+
+        <ThemeToggle />
+
+        {userData && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div className="">
+                  <Avatar>
+                    <AvatarImage src={userData.avatar_url}></AvatarImage>
+                  </Avatar>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 p-4">
+                <DropdownMenuItem className="text-sm text-muted-foreground" disabled>
+                  <Label>
+                    Eingeloggt als: {userData.username}
+                  </Label>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                    Profil bearbeiten (bald)
+                </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleLogout}>Ausloggen</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+        )}
       </div>
 
-      {/* Benutzer-Avatar rechts */}
-      {userData && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="p-0">
-              <div className="w-20 h-20 rounded-full overflow-hidden">
-                <img
-                  src={userData.avatar_url}
-                  alt="Profilbild"
-                  width={75}
-                  height={75}
-                  className="object-cover w-full h-full"
-                />
-              </div>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <div className="px-3 py-2 text-sm text-muted-foreground">
-              Eingeloggt als
-              <br />
-              <span className="font-medium text-black">
-                {userData.username}
-              </span>
-            </div>
-            <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
-            <DropdownMenuItem disabled>
-              Profil bearbeiten (bald)
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
     </header>
   );
 }

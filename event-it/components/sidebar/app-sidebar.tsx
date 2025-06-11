@@ -66,7 +66,7 @@ export default function AppSidebar() {
                 key={group.id}
                 title={group.name}
                 onClick={() =>
-                  router.push(`/freinds/groups/create/${group.id}`)
+                  router.push(`/friends/groups/${group.id}`)
                 }
               >
                 <span>{group.name}</span>
@@ -77,7 +77,7 @@ export default function AppSidebar() {
               variant="ghost"
               size="icon"
               className="w-10 h-10 rounded-full"
-              onClick={() => router.push("/freinds/groups/create")} // Dein Zielpfad hier
+              onClick={() => router.push("/friends/groups/create")} // Dein Zielpfad hier
             >
               <Plus className="h-5 w-5" />
             </Button>
