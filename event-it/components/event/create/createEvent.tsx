@@ -39,6 +39,7 @@ const formSchema = z.object({
 
 type EventInsert = Database["public"]["Tables"]["events"]["Insert"];
 type VenueInsert = Database["public"]["Tables"]["venues"]["Insert"];
+type VenueUpdate = Database["public"]["Tables"]["venues"]["Update"];
 
 type FormData = z.infer<typeof formSchema>
 
@@ -110,58 +111,66 @@ export default function CreateEventForm() {
             setValue('postal_code', venuesData.postal_code)
             setValue('street', venuesData.street)
             setValue('house_number', venuesData.house_number)
-            console.log(Boolean(event.public))
+            //console.log(Boolean(event.public))
         }
         fetchEvent()
     }, [eventId])
 
-    const onSubmit = async (data: FormData) => {
-        console.log('Form data before submission:', data)
+    const onSubmit = async (formData: FormData) => {
+        //console.log('Form data before submission:', data)
         setIsSubmitting(true)
         const supabase = createClient();
 
         try {
-            console.log('Submitting event data:', data)
+            //console.log('Submitting event data:', data)
             const { data: { user }, error: userError } = await supabase.auth.getUser()
 
             if (userError || !user || !user.id) {
                 return
             }
 
-            const insertDataVenue: VenueInsert = {
-                creator_id: user.id,
-                country: data.country,
-                city: data.city,
-                postal_code: data.postal_code,
-                street: data.street,
-                house_number: data.house_number,
+            const { data: event, error:eventerror } = await supabase
+                .from('events')
+                .select('*')
+                .eq('id', eventId)
+                .single()
+
+            if (eventerror) {
+                alert (eventerror)
+                return
             }
 
-            const result = await supabase.from('venues').upsert(insertDataVenue, { onConflict: 'country,city,postal_code,street,house_number' });
-            if(result.error){}
+            const updateDataVenue: VenueUpdate = {
+                creator_id: user.id,
+                country: formData.country,
+                city: formData.city,
+                postal_code: formData.postal_code,
+                street: formData.street,
+                house_number: formData.house_number,
+            }
 
-            const {error, data: venue} = await supabase.from("venues").select("id")
-                .eq("country",data.country )
-                .eq("city",data.city )
-                .eq("postal_code",data.postal_code )
-                .eq("street",data.street )
-                .eq("house_number",data.house_number )
-                .limit(1).single();
+            const { data: venue, error } = await supabase
+                .from('venues')
+                .update(updateDataVenue)
+                .eq("id", event.venue_id!)
+                .select("*")
+                .single()
 
+            console.log(venue)
             if (error) {
-                alert('Error creating event: ' + error.message)
+                alert('Error creating event: 2' + error.message)
             } else {
                 const insertData: EventInsert = {
-                    name: data.name,
-                    description: data.description || null,
-                    start_time: data.start_time,
-                    end_time: data.end_time,
-                    venue_id: venue?.id || null,
-                    image_url: data.image_url || null,
-                    max_attendees: data.max_attendees || null,
+                    name: formData.name,
+                    description: formData.description || null,
+                    start_time: formData.start_time,
+                    end_time: formData.end_time,
+                    venue_id: venue.id || null,
+                    image_url: formData.image_url || null,
+                    max_attendees: formData.max_attendees || null,
                     status: 'draft',
                     creator_id: user.id,
-                    public: data.public,
+                    public: formData.public,
                 }
                 let error
 
@@ -174,7 +183,7 @@ export default function CreateEventForm() {
                 }
 
                 if (error) {
-                    alert('Error creating event: ' + error.message)
+                    alert('Error creating event: 3' + error.message)
                 } else {
                     const {error, data: event} = await supabase.from("events").select("id").eq("creator_id", user.id).order("created_at", { ascending: false }).limit(1).single();
 
@@ -190,7 +199,7 @@ export default function CreateEventForm() {
                 }
             }
         } catch (error) {
-            console.error('Error creating event:', error)
+            console.error('Error creating event:1', error)
         } finally {
             setIsSubmitting(false)
         }
