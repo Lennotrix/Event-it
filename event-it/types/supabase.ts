@@ -9,68 +9,98 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      event_attendances: {
+      event_chats: {
         Row: {
+          content: string
+          created_at: string | null
           event_id: string
+          group_id: string | null
           id: string
-          notes: string | null
-          registered_at: string
-          user_id: string
+          sender_id: string
+          user_id: string | null
         }
         Insert: {
+          content: string
+          created_at?: string | null
           event_id: string
+          group_id?: string | null
           id?: string
-          notes?: string | null
-          registered_at?: string
-          user_id: string
+          sender_id: string
+          user_id?: string | null
         }
         Update: {
+          content?: string
+          created_at?: string | null
           event_id?: string
+          group_id?: string | null
           id?: string
-          notes?: string | null
-          registered_at?: string
-          user_id?: string
+          sender_id?: string
+          user_id?: string | null
         }
         Relationships: [
           {
-            foreignKeyName: "event_attendances_event_id_foreign"
+            foreignKeyName: "event_chats_event_id_fkey"
             columns: ["event_id"]
             isOneToOne: false
             referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_chats_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "friend_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_chats_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_chats_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
       }
       event_invitations: {
         Row: {
-          created_at: string
-          event_id: string
-          group_id: string | null
+          accepted_at: string | null
+          created_at: string | null
+          event_id: string | null
+          group_id: string
           id: string
-          method: Database["public"]["Enums"]["invitation_method"]
-          status: Database["public"]["Enums"]["invitation_status"]
-          updated_at: string
-          user_id: string
+          notes: string | null
+          status: Database["public"]["Enums"]["invitation_status"] | null
+          updated_at: string | null
+          user_id: string | null
         }
         Insert: {
-          created_at?: string
-          event_id: string
-          group_id?: string | null
+          accepted_at?: string | null
+          created_at?: string | null
+          event_id?: string | null
+          group_id: string
           id?: string
-          method?: Database["public"]["Enums"]["invitation_method"]
-          status?: Database["public"]["Enums"]["invitation_status"]
-          updated_at?: string
-          user_id: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["invitation_status"] | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Update: {
-          created_at?: string
-          event_id?: string
-          group_id?: string | null
+          accepted_at?: string | null
+          created_at?: string | null
+          event_id?: string | null
+          group_id?: string
           id?: string
-          method?: Database["public"]["Enums"]["invitation_method"]
-          status?: Database["public"]["Enums"]["invitation_status"]
-          updated_at?: string
-          user_id?: string
+          notes?: string | null
+          status?: Database["public"]["Enums"]["invitation_status"] | null
+          updated_at?: string | null
+          user_id?: string | null
         }
         Relationships: [
           {
@@ -85,6 +115,13 @@ export type Database = {
             columns: ["group_id"]
             isOneToOne: false
             referencedRelation: "friend_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_invitations_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
