@@ -15,7 +15,7 @@ import {EventWithVenue} from "@/types/exposed";
 import {ReactNode} from "react";
 
 
-export function Eventelement({event,children}: { event: EventWithVenue,children: ReactNode }) {
+export function Eventelement({event, children, onImageClick}: { event: EventWithVenue, children?: ReactNode , onImageClick?: () => void}) {
 
     // Hilfsfunktion zur Formatierung
     const formatGermanDate = (isoString: string) => {
@@ -38,8 +38,9 @@ export function Eventelement({event,children}: { event: EventWithVenue,children:
                     <img
                         src={event.image_url?.toString()}
                         alt={event.name}
-                        className="w-full h-40 object-cover rounded-t-md"
-                    />
+                        className="w-full h-40 object-cover rounded-t-md cursor-pointer"
+                        onClick={onImageClick}
+                   />
                 </div>
                 <CardTitle className="">
                     {event.name}
