@@ -29,10 +29,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={geistSans.className} suppressHydrationWarning>
-      <body className="w-screen">
+      <body className="">
       <ThemeProvider>
           <PopupProvider>
-              {children}
+              <div className="h-full">
+                  {children}
+              </div>
           </PopupProvider>
           <Suspense fallback={null} >
               <ToastFromQuery/>
