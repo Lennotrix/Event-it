@@ -1,8 +1,7 @@
 "use client";
 
 import SingelChat, {DirectChatProps} from "@/components/chat/singleChat";
-
-type GroupChatProps = { eventId: string; groupId: string; recipientId?: never };
+import GroupChat, {GroupChatProps} from "@/components/chat/GroupChat";
 
 type ChatProps = GroupChatProps | DirectChatProps;
 
@@ -12,10 +11,10 @@ export default function Chat({eventId, recipientId, groupId }: ChatProps) {
         console.error("No eventId provided");
         return null;
     }
-    if (!recipientId) {
-        return null;
+    if (!recipientId && groupId) {
+        return <GroupChat eventId={eventId} groupId={groupId}/>
     }
-    if (!groupId) {
+    if (!groupId && recipientId) {
         return <SingelChat eventId={eventId} recipientId={recipientId} />
     }
     return (

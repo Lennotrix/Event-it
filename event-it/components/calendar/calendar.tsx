@@ -3,11 +3,10 @@
 import { useEffect, useState, useMemo, useCallback } from "react"
 import { createClient } from "@/utils/supabase/client"
 import { Calendar as BigCalendar, Views, View } from "react-big-calendar"
-import {localizer, timeGutterFormat} from "@/lib/calendarLocalizer"
+import {localizer} from "@/lib/calendarLocalizer"
 import "react-big-calendar/lib/css/react-big-calendar.css"
-import { parseISO } from "date-fns"
+import "@/styles/calendar-dark.css"
 import { usePopup } from "@/components/provider/popupProvider"
-import { DayViewDialog } from "@/components/calendar/dayViewPopup"
 import {useRouter} from "next/navigation";
 
 export default function CalendarPage() {
@@ -71,7 +70,7 @@ export default function CalendarPage() {
     }, [])
 
     return (
-        <div className="h-full w-full p-4">
+        <div className="text-foreground bg-background p-2 rounded-xl shadow h-2/3 xl:h-full">
             {loaded && (
                 <BigCalendar
                     localizer={localizer}
@@ -82,7 +81,6 @@ export default function CalendarPage() {
                     onView={handleViewChange}
                     date={currentDate}
                     onNavigate={handleNavigate}
-                    views={["month", "week", "day"]}
                     onSelectEvent={handleSelectEvent}
                     formats={{
                         timeGutterFormat: (date, culture, localizer) =>

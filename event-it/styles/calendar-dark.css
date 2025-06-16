@@ -1,0 +1,72 @@
+/* Base Calendar Layout */
+.rbc-calendar {
+    @apply bg-background text-foreground;
+}
+
+.rbc-toolbar {
+    @apply flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-4 text-sm font-medium;
+}
+
+/* Button Group (Month/Week/Day toggle) */
+.rbc-btn-group button {
+    @apply border-border rounded-md bg-background text-foreground transition;
+}
+
+.rbc-btn-group button.rbc-active {
+    @apply bg-primary text-primary-foreground border-border ;
+}
+
+/* Calendar Views */
+.rbc-month-view,
+.rbc-time-view,
+.rbc-agenda-view {
+    @apply bg-background text-foreground border-border;
+}
+
+.rbc-time-content,
+.rbc-timeslot-group,
+.rbc-time-slot {
+    @apply border-border;
+}
+
+/* Today */
+.rbc-today {
+    @apply bg-accent;
+}
+
+/* Event styles */
+.rbc-event {
+    @apply bg-primary text-primary-foreground rounded-sm px-1 py-0.5 text-xs;
+}
+
+/* Cells not in current month */
+.rbc-off-range {
+    @apply text-muted-foreground;
+}
+
+/* Agenda View */
+.rbc-agenda-date-cell,
+.rbc-agenda-time-cell,
+.rbc-agenda-event-cell {
+    @apply px-2 py-1;
+}
+
+/* Time gutter (hour labels) */
+.rbc-time-gutter {
+    @apply bg-background text-muted-foreground border-r border-border;
+}
+
+/* Event labels in time grid */
+.rbc-time-content .rbc-event {
+    @apply rounded bg-primary text-primary-foreground;
+}
+
+/* Each time slot row */
+.rbc-time-view .rbc-time-slot {
+    @apply border-border;
+}
+
+/* Vertical hour line on left */
+.rbc-time-view .rbc-time-gutter {
+    @apply border-border text-muted-foreground bg-background;
+}
