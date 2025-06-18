@@ -50,13 +50,7 @@ export default function CalendarPage() {
     }, [])
 
   const calendarEvents = useMemo(() => {
-    const seen = new Set();
     return events
-      .filter((e) => {
-        if (seen.has(e.event_id)) return false;
-        seen.add(e.event_id);
-        return true;
-      })
       .map((e) => ({
         title: e.events.name || "Untitled Event",
         start: new Date(e.events.start_time),
