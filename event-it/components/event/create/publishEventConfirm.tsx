@@ -66,11 +66,6 @@ export default function PublishEventConfirm({
 
     return (
         <div className="space-y-4">
-            <DialogTitle className="text-xl font-bold">Event veröffentlichen</DialogTitle>
-            <Label className="text-muted-foreground">
-                Bitte überprüfe die Details deines Events, bevor du es veröffentlichst.
-            </Label>
-
             <div className="space-y-2 pt-2">
                 <Label className="text-lg font-semibold">{event?.name}</Label>
                 <div className="flex items-center gap-2">

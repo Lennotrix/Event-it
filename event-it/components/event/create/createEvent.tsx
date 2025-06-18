@@ -192,10 +192,13 @@ export default function CreateEventForm() {
                         return;
                     }
 
-                    openPopup(<PublishEventConfirm eventId={event.id} closeAction={() => {
+                    openPopup(
+                        <PublishEventConfirm eventId={event.id} closeAction={() => {
                         closePopup();
                         router.push(`/events`);
-                    }} />)
+                        }} />,
+                        "Event veröffentlichen?",
+                        "Bitte überprüfe die Details deines Events, bevor du es veröffentlichst.")
                 }
             }
         } catch (error) {
