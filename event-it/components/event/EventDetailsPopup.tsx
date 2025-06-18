@@ -21,10 +21,12 @@ interface InviteInfo {
 export default function EventDetailsPopup({
   eventId,
   groupId,
+  inviterId,
   onClose,
 }: {
   eventId: string
   groupId?: string
+    inviterId?: string
   onClose: () => void
 }) {
   const [loading, setLoading] = useState(true)
@@ -120,11 +122,15 @@ const handleStatusChange = async (newStatus: 'accepted' | 'maybe' | 'declined') 
   if (!currentUserId) return
   const supabase = createClient()
 
-  const { error } = await supabase
+  const query = supabase
     .from('event_invitations')
     .update({ status: newStatus, accepted_at: new Date().toISOString() })
     .eq('event_id', eventId)
     .eq('user_id', currentUserId)
+
+  if(groupId) query.eq("group_id", groupId)
+  else if (inviterId) query.eq("inviter_id", inviterId)
+    const { error } = await query
 
   if (error) {
     toast.error("Status konnte nicht geändert werden.")

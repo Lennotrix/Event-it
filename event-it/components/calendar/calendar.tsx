@@ -20,6 +20,7 @@ export default function CalendarPage() {
   const [selectedEvent, setSelectedEvent] = useState<{
     eventId: string;
     groupId?: string;
+    inviterId?: string;
   } | null>(null);
 
     useEffect(() => {
@@ -49,23 +50,25 @@ export default function CalendarPage() {
         fetchEvents().catch(console.error)
     }, [])
 
-  const calendarEvents = useMemo(() => {
-    return events
-      .map((e) => ({
-        title: e.events.name || "Untitled Event",
-        start: new Date(e.events.start_time),
-        end: new Date(e.events.end_time),
-        allDay: false,
-        resource: e,
-        status: e.status,
-      }));
-  }, [events]);
+    const calendarEvents = useMemo(() => {
+        return events.map((e, i) => ({
+            id: `${e.event_id}-${e.group_id ?? e.inviter_id}-${e.status}-${i}`, // ensure unique
+            title: `${e.events.name} (${e.status})`, // optional, helps debugging
+            start: new Date(e.events.start_time),
+            end: new Date(e.events.end_time),
+            allDay: false,
+            resource: e,
+            status: e.status,
+        }));
+    }, [events]);
 
-  const handleSelectEvent = (event: any) => {
+
+    const handleSelectEvent = (event: any) => {
     const originalData = event.resource;
     setSelectedEvent({
       eventId: originalData.event_id,
       groupId: originalData.group_id,
+      inviterId: originalData.inviter_id,
     });
   };
 
@@ -130,6 +133,7 @@ export default function CalendarPage() {
         <EventDetailsPopup
           eventId={selectedEvent.eventId}
           groupId={selectedEvent.groupId}
+          inviterId={selectedEvent.inviterId}
           onClose={() => setSelectedEvent(null)}
         />
       )}

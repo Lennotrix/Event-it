@@ -40,7 +40,7 @@ export default function AddUserPopup({ onCloseAction, groupId }: { onCloseAction
             inviter_id: currentUser.user.id,
             message: message || "Ich möchte dich einladen!",
             group_id: groupId,
-            status_id: "b14733dd-588d-4a1d-bb03-03ba1d14e98f",
+            status_id: "f025d9e0-b50c-4991-afdd-f5c68ece21da", // "pending" status
         }
 
         const { error } = await supabase.from("friend_group_invites").insert(newUser)
