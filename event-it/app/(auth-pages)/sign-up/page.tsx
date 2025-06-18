@@ -3,6 +3,8 @@ import {Label} from "@/components/ui/label";
 import {Button} from "@/components/ui/button";
 import {AuthCard} from "@/components/auth/authCard";
 import {signUpAction} from "@/app/(auth-pages)/actions";
+import {AuthMessage} from "@/types/auth/authTypes";
+import {getAuthMessage} from "@/utils/auth/authMessage";
 
 
 export default async function SignupPage({
@@ -11,6 +13,8 @@ export default async function SignupPage({
     searchParams?: Promise<{ [key: string]: string | string[] }>;
 }) {
     const redirectTo = (await searchParams)?.redirect ?? "/";
+    const message = getAuthMessage(await searchParams);
+
 
     return (
         <AuthCard
@@ -25,7 +29,8 @@ export default async function SignupPage({
             }
             formAction={signUpAction}
             submitLabel="Sign up"
-        >
+            message={message}
+            >
             <Label htmlFor="username">Benutzername</Label>
             <Input name="username" placeholder="Benutzername" required/>
             <Label htmlFor="name">Vorname</Label>

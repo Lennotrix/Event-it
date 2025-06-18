@@ -50,7 +50,7 @@ export default function TopNav() {
           setUserData({
             id: data.id,
             username: data.username,
-            avatar_url: data.avatar_url ?? "/images/default.png",
+            avatar_url: data.avatar_url ?? "/images/usericon.png",
             first_name: data.first_name || "",
             last_name: data.last_name || "",
             bio: data.bio || "",
@@ -130,7 +130,7 @@ export default function TopNav() {
                 <DropdownMenuItem onClick={() => router.push("/invitations")}>
                   Einladungen{invitationCount > 0 && ` (${invitationCount})`}
                 </DropdownMenuItem>
-                <DropdownMenuItem  onClick={() => router.push("/events/me")}>
+                <DropdownMenuItem onClick={() => router.push("/events/me")}>
                   Meine Events
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
