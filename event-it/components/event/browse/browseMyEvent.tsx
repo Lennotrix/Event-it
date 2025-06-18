@@ -43,6 +43,22 @@ export default function BrowseMyEvent() {
         fetchEvents()
     }, [])
 
+    const handleDelete = async (id:string) => {
+
+        const supabase = await createClient()
+        const { error } = await supabase
+            .from("events") // Tabelle in Supabase
+            .delete()
+            .eq("id", id);
+
+        if (error) {
+            console.error("Fehler beim Löschen:", error.message);
+        } else {
+            window.location.reload();
+        }
+    };
+
+
     if (events.length === 0) {
         return <p>Loading...</p>
     }
@@ -57,8 +73,15 @@ export default function BrowseMyEvent() {
                                 Event bearbeiten
                             </Button>
                         </div>
+                        <div>
+                            <Button
+                                variant="destructive"
+                                onClick={() => handleDelete(event.id)}
+                            >
+                                Event löschen
+                            </Button>
+                        </div>
                     </div>
-
                 </Eventelement>
             ))}
         </div>
