@@ -12,6 +12,7 @@ import {
   // Removed DialogClose import since we'll use only one close button
 } from '@/components/ui/dialog'
 import { toast } from 'sonner'
+import Chat from "@/components/chat/chat"
 
 interface InviteInfo {
   status: string
@@ -44,13 +45,23 @@ export default function EventDetailsPopup({
   const [profiles, setProfiles] = useState<Record<string, { username: string; avatar_url: string | null }>>({})
   const [inviteData, setInviteData] = useState<Record<string, InviteInfo>>({})
   const [counts, setCounts] = useState({ accepted: 0, maybe: 0, declined: 0 })
+const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   const priority: Record<string, number> = { accepted: 3, maybe: 2, declined: 1 }
 
   useEffect(() => {
     const supabase = createClient()
+
     const load = async () => {
       try {
+
+        const { data: user, error: userError } = await supabase.auth.getUser()
+          if (userError) {
+              console.error("Error fetching user:", userError)
+              return
+          }
+          setCurrentUserId(user.user.id)
+
         const { data: ev } = await supabase
           .from('events')
           .select('name, image_url, start_time, end_time, venue:venues(street, house_number, postal_code, city)')
@@ -107,6 +118,8 @@ export default function EventDetailsPopup({
   if (loading) return <div className="text-center p-8">Lade Daten…</div>
 
   const maxCount = Math.max(counts.accepted, counts.maybe, counts.declined, 1)
+
+  
 
   return (
     <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -222,7 +235,10 @@ export default function EventDetailsPopup({
             {/* Right: Chat Placeholder */}
             <div className="w-1/4 border-l p-4 bg-secondary flex flex-col">
               <h2 className="text-xl font-semibold mb-4 text-foreground">Chat</h2>
-              <div className="text-center text-muted-foreground mt-auto mb-auto">Chat-Funktion bald verfügbar</div>
+             <div className="flex-1 overflow-hidden">
+              <Chat eventId={eventId}  recipientId={currentUserId!}  />
+            </div>
+
             </div>
           </div>
         </DialogContent>
