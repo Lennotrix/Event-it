@@ -35,7 +35,8 @@ export const updateSession = async (request: NextRequest) => {
     const isUnprotectedPage = request.nextUrl.pathname.includes("/sign-in") ||
         request.nextUrl.pathname.includes("/sign-up") ||
         request.nextUrl.pathname.includes("/forgot-password") ||
-        request.nextUrl.pathname.includes("/auth/callback");
+        request.nextUrl.pathname.includes("/auth/callback") ||
+        request.nextUrl.pathname.includes("/auth/signup");
 
     if (!isUnprotectedPage && user.error) {
       const redirectUrl = new URL("/sign-in", request.url);
