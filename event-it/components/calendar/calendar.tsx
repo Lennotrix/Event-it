@@ -57,6 +57,7 @@ export default function CalendarPage() {
         end: new Date(e.events.end_time),
         allDay: false,
         resource: e,
+        status: e.status,
       }));
   }, [events]);
 
@@ -79,22 +80,52 @@ export default function CalendarPage() {
   return (
     <div className="text-foreground bg-background p-2 rounded-xl shadow h-2/3 xl:h-full">
       {loaded && (
-        <BigCalendar
-          localizer={localizer}
-          events={calendarEvents}
-          startAccessor="start"
-          endAccessor="end"
-          view={currentView}
-          onView={handleViewChange}
-          date={currentDate}
-          onNavigate={handleNavigate}
-          onSelectEvent={handleSelectEvent}
-          formats={{
-            timeGutterFormat: (date, culture, localizer) =>
-              localizer!.format(date, "HH:mm", culture),
-          }}
-        />
-      )}
+          <BigCalendar
+              localizer={localizer}
+              events={calendarEvents}
+              startAccessor="start"
+              endAccessor="end"
+              view={currentView}
+              onView={handleViewChange}
+              date={currentDate}
+              onNavigate={handleNavigate}
+              onSelectEvent={handleSelectEvent}
+              formats={{
+                  timeGutterFormat: (date, culture, localizer) =>
+                      localizer!.format(date, "HH:mm", culture),
+              }}
+              eventPropGetter={(event) => {
+                  let backgroundColor = "#3b82f6"; // default: blue
+
+                  switch (event.status) {
+                      case "accepted":
+                          backgroundColor = "#10b981"; // green
+                          break;
+                      case "pending":
+                          backgroundColor = "#f59e0b"; // amber
+                          break;
+                      case "maybe":
+                          backgroundColor = "#f59e0b"; // amber
+                          break;
+                      case "declined":
+                          backgroundColor = "#ef4444"; // red
+                          break;
+                      case "expired":
+                            backgroundColor = "#6b7280"; // gray
+                            break;
+                  }
+
+                  return {
+                      style: {
+                          backgroundColor,
+                          borderRadius: "6px",
+                          color: "white",
+                          border: "none",
+                      },
+                  };
+              }}
+          />
+        )}
       {selectedEvent && (
         <EventDetailsPopup
           eventId={selectedEvent.eventId}
