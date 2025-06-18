@@ -92,13 +92,13 @@ export default function InvitationsPage() {
               {inv.message && <p>{inv.message}</p>}
               <div className="flex gap-2">
                 <Button onClick={() => handleAction(inv.id, true)}>
-                  Accept
+                  Akzeptieren
                 </Button>
                 <Button
                   variant="destructive"
                   onClick={() => handleAction(inv.id, false)}
                 >
-                  Decline
+                  Ablehnen
                 </Button>
               </div>
             </CardContent>

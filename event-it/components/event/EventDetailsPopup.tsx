@@ -134,6 +134,12 @@ const handleStatusChange = async (newStatus: 'accepted' | 'maybe' | 'declined') 
   await loadData() // 🟢 direkt neue Daten laden, ohne das Modal zu schließen
 }
 
+const statusTranslations: Record<'accepted' | 'maybe' | 'declined', string> = {
+  accepted: "Akzeptiert",
+  maybe: "Vielleicht",
+  declined: "Abgelehnt",
+}
+
   if (loading) return <div className="text-center p-8">Lade Daten…</div>
 
   const maxCount = Math.max(counts.accepted, counts.maybe, counts.declined, 1)
@@ -167,6 +173,8 @@ const handleStatusChange = async (newStatus: 'accepted' | 'maybe' | 'declined') 
                 </div>
               )}
 
+
+
               {currentUserId && (
                 <div className="p-4 border-b flex gap-2">
                   {(['accepted', 'maybe', 'declined'] as const).map((status) => (
@@ -176,7 +184,7 @@ const handleStatusChange = async (newStatus: 'accepted' | 'maybe' | 'declined') 
                       onClick={() => handleStatusChange(status)}
                       className={inviteData[currentUserId]?.status === status ? "border-2 border-primary" : ""}
                     >
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                      {statusTranslations[status]}
                     </Button>
                   ))}
                 </div>
@@ -210,7 +218,7 @@ const handleStatusChange = async (newStatus: 'accepted' | 'maybe' | 'declined') 
                         ))}
                       </div>
                       <p className="text-sm text-muted-foreground mt-1 capitalize">
-                        {status}: {count}
+                        {statusTranslations[status]}: {count}
                       </p>
                     </div>
                   )
