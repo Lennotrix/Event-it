@@ -3,7 +3,6 @@ import {Label} from "@/components/ui/label";
 import {Button} from "@/components/ui/button";
 import {AuthCard} from "@/components/auth/authCard";
 import {signUpAction} from "@/app/(auth-pages)/actions";
-import {AuthMessage} from "@/types/auth/authTypes";
 import {getAuthMessage} from "@/utils/auth/authMessage";
 
 
