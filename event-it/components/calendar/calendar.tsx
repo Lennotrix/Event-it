@@ -1,93 +1,113 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react"
-import { createClient } from "@/utils/supabase/client"
-import { Calendar as BigCalendar, Views, View } from "react-big-calendar"
-import {localizer} from "@/lib/calendarLocalizer"
-import "react-big-calendar/lib/css/react-big-calendar.css"
-import "@/styles/calendar-dark.css"
-import { usePopup } from "@/components/provider/popupProvider"
-import {useRouter} from "next/navigation";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { createClient } from "@/utils/supabase/client";
+import { Calendar as BigCalendar, Views, View } from "react-big-calendar";
+import { localizer } from "@/lib/calendarLocalizer";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import "@/styles/calendar-dark.css";
+import { usePopup } from "@/components/provider/popupProvider";
+import { useRouter } from "next/navigation";
+import EventDetailsPopup from "@/components/event/EventDetailsPopup";
 
 export default function CalendarPage() {
-    const [events, setEvents] = useState<any[]>([])
-    const [loaded, setLoaded] = useState(false)
-    const [currentDate, setCurrentDate] = useState(new Date())
-    const [currentView, setCurrentView] = useState<View>(Views.WEEK)
-    const router = useRouter()
-    const { openPopup } = usePopup()
+  const [events, setEvents] = useState<any[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentView, setCurrentView] = useState<View>(Views.WEEK);
+  const router = useRouter();
+  const { openPopup } = usePopup();
+  const [selectedEvent, setSelectedEvent] = useState<{
+    eventId: string;
+    groupId?: string;
+  } | null>(null);
 
-    useEffect(() => {
-        async function fetchEvents() {
-            const supabase = createClient()
-            const { data: user, error: userError } = await supabase.auth.getUser()
+  useEffect(() => {
+    async function fetchEvents() {
+      const supabase = createClient();
+      const { data: user, error: userError } = await supabase.auth.getUser();
 
-            if (userError) {
-                console.error("Error fetching user:", userError)
-                return
-            }
+      if (userError) {
+        console.error("Error fetching user:", userError);
+        return;
+      }
 
-            const { data, error } = await supabase
-                .from("event_invitations")
-                .select("*,events(*,venues(*))")
-                .eq("user_id", user.user?.id)
+      const { data, error } = await supabase
+        .from("event_invitations")
+        .select("*,events(*,venues(*))")
+        .eq("user_id", user.user?.id);
 
-            if (error) {
-                console.error("Error fetching events:", error)
-                return
-            }
+      if (error) {
+        console.error("Error fetching events:", error);
+        return;
+      }
 
-            setEvents(data)
-            setLoaded(true)
-        }
-
-        fetchEvents().catch(console.error)
-    }, [])
-
-    const calendarEvents = useMemo(() => {
-        return events.map((e) => {
-            return {
-                title: e.events.name || "Untitled Event",
-                start: new Date(e.events.start_time),
-                end: new Date(e.events.end_time),
-                allDay: false,
-                resource: e,
-            }
-        })
-    }, [events])
-
-    const handleSelectEvent = (event: any) => {
-        const originalData = event.resource
-        router.push(`/events/${originalData.event_id}`)
+      setEvents(data);
+      setLoaded(true);
     }
 
-    const handleNavigate = useCallback((newDate: Date) => {
-        setCurrentDate(newDate)
-    }, [])
+    fetchEvents().catch(console.error);
+  }, []);
 
-    const handleViewChange = useCallback((newView: View) => {
-        setCurrentView(newView)
-    }, [])
+  const calendarEvents = useMemo(() => {
+    const seen = new Set();
+    return events
+      .filter((e) => {
+        if (seen.has(e.event_id)) return false;
+        seen.add(e.event_id);
+        return true;
+      })
+      .map((e) => ({
+        title: e.events.name || "Untitled Event",
+        start: new Date(e.events.start_time),
+        end: new Date(e.events.end_time),
+        allDay: false,
+        resource: e,
+      }));
+  }, [events]);
 
-    return (
-        <div className="text-foreground bg-background p-2 rounded-xl shadow h-2/3 xl:h-full">
-            {loaded && (
-                <BigCalendar
-                    localizer={localizer}
-                    events={calendarEvents}
-                    startAccessor="start"
-                    endAccessor="end"
-                    view={currentView}
-                    onView={handleViewChange}
-                    date={currentDate}
-                    onNavigate={handleNavigate}
-                    onSelectEvent={handleSelectEvent}
-                    formats={{
-                        timeGutterFormat: (date, culture, localizer) =>
-                            localizer!.format(date, "HH:mm", culture),
-                    }}
-                />
-            )}
-        </div>
-    )
+  const handleSelectEvent = (event: any) => {
+    const originalData = event.resource;
+    setSelectedEvent({
+      eventId: originalData.event_id,
+      groupId: originalData.group_id,
+    });
+  };
+
+  const handleNavigate = useCallback((newDate: Date) => {
+    setCurrentDate(newDate);
+  }, []);
+
+  const handleViewChange = useCallback((newView: View) => {
+    setCurrentView(newView);
+  }, []);
+
+  return (
+    <div className="text-foreground bg-background p-2 rounded-xl shadow h-2/3 xl:h-full">
+      {loaded && (
+        <BigCalendar
+          localizer={localizer}
+          events={calendarEvents}
+          startAccessor="start"
+          endAccessor="end"
+          view={currentView}
+          onView={handleViewChange}
+          date={currentDate}
+          onNavigate={handleNavigate}
+          onSelectEvent={handleSelectEvent}
+          formats={{
+            timeGutterFormat: (date, culture, localizer) =>
+              localizer!.format(date, "HH:mm", culture),
+          }}
+        />
+      )}
+      {selectedEvent && (
+        <EventDetailsPopup
+          eventId={selectedEvent.eventId}
+          groupId={selectedEvent.groupId}
+          onClose={() => setSelectedEvent(null)}
+        />
+      )}
+    </div>
+  );
 }

@@ -28,7 +28,7 @@ export default function EditUserPopup({
   };
 }) {
   const [username, setUsername] = useState(currentValues.username || "");
-  const [avatarUrl, setAvatarUrl] = useState(currentValues.avatar_url || "");
+  const [avatarUrl, setAvatarUrl] = useState(currentValues.avatar_url ?? "");
   const [firstName, setFirstName] = useState(currentValues.first_name || "");
   const [lastName, setLastName] = useState(currentValues.last_name || "");
   const [bio, setBio] = useState(currentValues.bio || "");
@@ -70,25 +70,28 @@ export default function EditUserPopup({
           placeholder="Benutzername"
         />
 
-        <Label>Avatar URL</Label>
-        <div className="flex items-center gap-4">
-          {avatarUrl && showImage && (
+
+        <div className="flex items-center gap-4 w-full">
+          {showImage && (
             <img
-              src={avatarUrl}
+              src={avatarUrl || "/images/usericon.png"}
               alt="Avatar Vorschau"
               className="w-16 h-16 rounded-full object-cover border"
               onError={() => setShowImage(false)}
             />
           )}
-          <Input
-            value={avatarUrl}
-            onChange={(e) => {
-              setAvatarUrl(e.target.value);
-              setShowImage(true);
-            }}
-            placeholder="https://..."
-            className="flex-1"
-          />
+            <div className="w-full">
+            <Label>Avatar URL</Label>
+            <Input
+              value={avatarUrl}
+              onChange={(e) => {
+                setAvatarUrl(e.target.value);
+                setShowImage(true);
+              }}
+              placeholder="https://..."
+              className="flex-1"
+            />
+          </div>
         </div>
 
         <Label>Vorname</Label>

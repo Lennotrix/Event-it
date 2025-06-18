@@ -29,6 +29,7 @@ export default function TopNav() {
   } | null>(null);
 
   const [editOpen, setEditOpen] = useState(false);
+  const [invitationCount, setInvitationCount] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -49,12 +50,20 @@ export default function TopNav() {
           setUserData({
             id: data.id,
             username: data.username,
-            avatar_url: data.avatar_url ?? "/fallback.png",
+            avatar_url: data.avatar_url ?? "/images/usericon.png",
             first_name: data.first_name || "",
             last_name: data.last_name || "",
             bio: data.bio || "",
           });
         }
+
+        const { data: invites } = await supabase
+          .from("friend_group_invites")
+          .select("id")
+          .eq("invited_user_id", user.id)
+          .is("responded_at", null);
+
+        setInvitationCount(invites?.length ?? 0);
       }
     };
 
@@ -80,11 +89,11 @@ export default function TopNav() {
 
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => router.push("/kalender")}>
-            Kalendar
-          </Button>
           <Button variant="outline" onClick={() => router.push("/events")}>
             Events
+          </Button>
+          <Button variant="outline" onClick={() => router.push("/events/create")}>
+            Event erstellen
           </Button>
         </div>
 
@@ -94,10 +103,18 @@ export default function TopNav() {
           <>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div>
+                <div className="relative cursor-pointer">
                   <Avatar>
-                    <AvatarImage src={userData.avatar_url} />
+                    <AvatarImage src={
+                      userData.avatar_url
+                          ? userData.avatar_url
+                          : "/images/usericon.png"
+                    }
+                    />
                   </Avatar>
+                  {invitationCount > 0 && (
+                    <div className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full" />
+                  )}
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 p-4">
@@ -109,6 +126,12 @@ export default function TopNav() {
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setEditOpen(true)}>
                   Profil bearbeiten
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/invitations")}>
+                  Einladungen{invitationCount > 0 && ` (${invitationCount})`}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/events/me")}>
+                  Meine Events
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
                   Ausloggen

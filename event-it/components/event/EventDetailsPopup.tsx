@@ -8,10 +8,9 @@ import {
   DialogPortal,
   DialogOverlay,
   DialogTitle,
-  DialogDescription,    // optional
-  // Removed DialogClose import since we'll use only one close button
 } from '@/components/ui/dialog'
 import { toast } from 'sonner'
+import Chat from "@/components/chat/chat"
 
 interface InviteInfo {
   status: string
@@ -41,68 +40,99 @@ export default function EventDetailsPopup({
       city: string
     } | null
   } | null>(null)
+
   const [profiles, setProfiles] = useState<Record<string, { username: string; avatar_url: string | null }>>({})
   const [inviteData, setInviteData] = useState<Record<string, InviteInfo>>({})
   const [counts, setCounts] = useState({ accepted: 0, maybe: 0, declined: 0 })
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   const priority: Record<string, number> = { accepted: 3, maybe: 2, declined: 1 }
 
-  useEffect(() => {
+  const loadData = async () => {
     const supabase = createClient()
-    const load = async () => {
-      try {
-        const { data: ev } = await supabase
-          .from('events')
-          .select('name, image_url, start_time, end_time, venue:venues(street, house_number, postal_code, city)')
-          .eq('id', eventId)
-          .single()
-        if (ev) setEventInfo(ev as any)
-
-        let q = supabase
-          .from('event_invitations')
-          .select('user_id, status, notes, accepted_at')
-          .eq('event_id', eventId)
-          .in('status', ['accepted', 'maybe', 'declined'])
-        if (groupId) q = q.eq('group_id', groupId)
-        const { data: invs = [], error } = await q
-        if (error) throw error
-
-        const dedup: Record<string, InviteInfo> = {}
-        invs?.forEach(inv => {
-          const uid = inv.user_id!
-          const st = inv.status!
-          if (!dedup[uid] || priority[st] > priority[dedup[uid].status]) {
-            dedup[uid] = { status: st, notes: inv.notes, accepted_at: inv.accepted_at }
-          }
-        })
-        setInviteData(dedup)
-
-        const vals = Object.values(dedup)
-        setCounts({
-          accepted: vals.filter(i => i.status === 'accepted').length,
-          maybe: vals.filter(i => i.status === 'maybe').length,
-          declined: vals.filter(i => i.status === 'declined').length,
-        })
-
-        const ids = Object.keys(dedup)
-        if (ids.length) {
-          const { data: profs = [] } = await supabase
-            .from('profiles')
-            .select('id, username, avatar_url')
-            .in('id', ids)
-          const pm: typeof profiles = {}
-          profs?.forEach(p => { pm[p.id] = { username: p.username, avatar_url: p.avatar_url } })
-          setProfiles(pm)
-        }
-      } catch (err) {
-        console.error(err)
-        toast.error('Fehler', { description: 'Konnte Daten nicht laden.' })
-      } finally {
-        setLoading(false)
+    try {
+      const { data: user, error: userError } = await supabase.auth.getUser()
+      if (userError || !user?.user) {
+        console.error("Fehler beim Laden des Benutzers:", userError)
+        return
       }
+
+      const uid = user.user.id
+      setCurrentUserId(uid)
+
+      const { data: ev } = await supabase
+        .from('events')
+        .select('name, image_url, start_time, end_time, venue:venues(street, house_number, postal_code, city)')
+        .eq('id', eventId)
+        .single()
+      if (ev) setEventInfo(ev as any)
+
+      let q = supabase
+        .from('event_invitations')
+        .select('user_id, status, notes, accepted_at')
+        .eq('event_id', eventId)
+        .in('status', ['accepted', 'maybe', 'declined'])
+
+      if (groupId) q = q.eq('group_id', groupId)
+      const { data: invs = [], error } = await q
+      if (error) throw error
+
+      const dedup: Record<string, InviteInfo> = {}
+      invs?.forEach(inv => {
+        const uid = inv.user_id!
+        const st = inv.status!
+        if (!dedup[uid] || priority[st] > priority[dedup[uid].status]) {
+          dedup[uid] = { status: st, notes: inv.notes, accepted_at: inv.accepted_at }
+        }
+      })
+      setInviteData(dedup)
+
+      const vals = Object.values(dedup)
+      setCounts({
+        accepted: vals.filter(i => i.status === 'accepted').length,
+        maybe: vals.filter(i => i.status === 'maybe').length,
+        declined: vals.filter(i => i.status === 'declined').length,
+      })
+
+      const ids = Object.keys(dedup)
+      if (ids.length) {
+        const { data: profs = [] } = await supabase
+          .from('profiles')
+          .select('id, username, avatar_url')
+          .in('id', ids)
+        const pm: typeof profiles = {}
+        profs?.forEach(p => { pm[p.id] = { username: p.username, avatar_url: p.avatar_url } })
+        setProfiles(pm)
+      }
+    } catch (err) {
+      console.error(err)
+      toast.error('Fehler', { description: 'Konnte Daten nicht laden.' })
+    } finally {
+      setLoading(false)
     }
-    load()
+  }
+
+  useEffect(() => {
+    loadData()
   }, [eventId, groupId])
+
+const handleStatusChange = async (newStatus: 'accepted' | 'maybe' | 'declined') => {
+  if (!currentUserId) return
+  const supabase = createClient()
+
+  const { error } = await supabase
+    .from('event_invitations')
+    .update({ status: newStatus, accepted_at: new Date().toISOString() })
+    .eq('event_id', eventId)
+    .eq('user_id', currentUserId)
+
+  if (error) {
+    toast.error("Status konnte nicht geändert werden.")
+    return
+  }
+
+  await loadData() // 🟢 direkt neue Daten laden, ohne das Modal zu schließen
+}
 
   if (loading) return <div className="text-center p-8">Lade Daten…</div>
 
@@ -112,17 +142,12 @@ export default function EventDetailsPopup({
     <Dialog open onOpenChange={(open) => !open && onClose()}>
       <DialogPortal>
         <DialogOverlay className="fixed inset-0 bg-black/50" />
-        <DialogContent className="fixed top-1/2 left-1/2  w-[80vw] max-w-none h-[70vh] -translate-x-1/2 -translate-y-1/2 p-0 bg-popover text-popover-foreground overflow-hidden">
+        <DialogContent className="fixed top-1/2 left-1/2 w-[80vw] max-w-none h-[70vh] -translate-x-1/2 -translate-y-1/2 p-0 bg-popover text-popover-foreground overflow-hidden flex flex-col">
+          <DialogTitle className="sr-only">{eventInfo?.name}</DialogTitle>
 
-
-      <DialogTitle className="sr-only">
-  {eventInfo?.name}
-</DialogTitle>         
-
-          <div className="flex h-full">
-            {/* Left: Status Bars */}
-            <div className="w-1/4 border-r flex flex-col">
-              {/* Header in left column */}
+          <div className="flex flex-1 overflow-hidden">
+            {/* Left: Infos + Vote */}
+            <div className="w-1/3 flex flex-col h-full overflow-hidden border-r">
               {eventInfo && (
                 <div className="p-4 border-b flex items-center space-x-4">
                   {eventInfo.image_url && (
@@ -141,32 +166,45 @@ export default function EventDetailsPopup({
                   </div>
                 </div>
               )}
-              <div className="flex-1 p-4 flex flex-col justify-start space-y-4">
+
+              {currentUserId && (
+                <div className="p-4 border-b flex gap-2">
+                  {(['accepted', 'maybe', 'declined'] as const).map((status) => (
+                    <Button
+                      key={status}
+                      variant="outline"
+                      onClick={() => handleStatusChange(status)}
+                      className={inviteData[currentUserId]?.status === status ? "border-2 border-primary" : ""}
+                    >
+                      {status.charAt(0).toUpperCase() + status.slice(1)}
+                    </Button>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {(['accepted', 'maybe', 'declined'] as const).map(status => {
                   const track = 'bg-muted'
                   const fill = status === 'accepted'
                     ? 'bg-green-500 dark:bg-green-400'
                     : status === 'maybe'
-                    ? 'bg-yellow-500 dark:bg-yellow-400'
-                    : 'bg-red-500 dark:bg-red-400'
+                      ? 'bg-yellow-500 dark:bg-yellow-400'
+                      : 'bg-red-500 dark:bg-red-400'
                   const tick = status === 'accepted'
                     ? 'bg-green-700 dark:bg-green-600'
                     : status === 'maybe'
-                    ? 'bg-yellow-700 dark:bg-yellow-600'
-                    : 'bg-red-700 dark:bg-red-600'
+                      ? 'bg-yellow-700 dark:bg-yellow-600'
+                      : 'bg-red-700 dark:bg-red-600'
                   const count = counts[status]
                   const widthPct = (count / maxCount) * 100
                   return (
                     <div key={status}>
                       <div className={`h-12 w-full rounded-full relative overflow-hidden ${track}`}>
-                        <div
-                          className={`${fill} h-full rounded-full`} 
-                          style={{ width: `${widthPct}%` }}
-                        />
+                        <div className={`${fill} h-full rounded-full`} style={{ width: `${widthPct}%` }} />
                         {Array.from({ length: count }).map((_, i) => (
                           <div
                             key={i}
-                            className={`${tick} absolute w-0.5 h-full`} 
+                            className={`${tick} absolute w-0.5 h-full`}
                             style={{ left: `${((i + 1) / (count + 1)) * 100}%` }}
                           />
                         ))}
@@ -180,17 +218,19 @@ export default function EventDetailsPopup({
               </div>
             </div>
 
-            {/* Middle: Participants List */}
-            <div className="w-1/4 p-6 overflow-y-auto flex flex-col">
-              <h2 className="text-xl font-semibold mb-4 text-center text-foreground">Teilnehmerübersicht</h2>
-              <div className="space-y-4 flex-1 overflow-y-auto">
+            {/* Mitte: Teilnehmerliste */}
+            <div className="w-1/3 flex flex-col h-full overflow-hidden border-r">
+              <div className="p-4 border-b">
+                <h2 className="text-xl font-semibold text-center text-foreground">Teilnehmerübersicht</h2>
+              </div>
+              <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {Object.entries(inviteData).map(([uid, info]) => {
                   const prof = profiles[uid]
                   const nameCls = info.status === 'accepted'
                     ? 'text-green-600 dark:text-green-400'
                     : info.status === 'maybe'
-                    ? 'text-yellow-600 dark:text-yellow-400'
-                    : 'text-red-600 dark:text-red-400'
+                      ? 'text-yellow-600 dark:text-yellow-400'
+                      : 'text-red-600 dark:text-red-400'
                   return (
                     <div key={uid} className="flex items-center p-3 border rounded-lg space-x-3">
                       <Avatar className="w-8 h-8">
@@ -211,7 +251,9 @@ export default function EventDetailsPopup({
                             Akzeptiert am {new Date(info.accepted_at).toLocaleString()}
                           </p>
                         )}
-                        {info.notes && <p className="text-sm text-muted-foreground">Notiz: {info.notes}</p>}
+                        {info.notes && (
+                          <p className="text-sm text-muted-foreground">Notiz: {info.notes}</p>
+                        )}
                       </div>
                     </div>
                   )
@@ -219,10 +261,14 @@ export default function EventDetailsPopup({
               </div>
             </div>
 
-            {/* Right: Chat Placeholder */}
-            <div className="w-1/4 border-l p-4 bg-secondary flex flex-col">
-              <h2 className="text-xl font-semibold mb-4 text-foreground">Chat</h2>
-              <div className="text-center text-muted-foreground mt-auto mb-auto">Chat-Funktion bald verfügbar</div>
+            {/* Rechts: Chat */}
+            <div className="w-1/3 flex flex-col h-full overflow-hidden">
+              <div className="p-4 border-b">
+                <h2 className="text-xl font-semibold text-foreground">Chat</h2>
+              </div>
+              <div className="flex-1 overflow-hidden p-2">
+                {groupId && <Chat eventId={eventId} groupId={groupId} />}
+              </div>
             </div>
           </div>
         </DialogContent>
