@@ -29,6 +29,7 @@ export default function TopNav() {
   } | null>(null);
 
   const [editOpen, setEditOpen] = useState(false);
+  const [hasInvitations, setHasInvitations] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -55,6 +56,14 @@ export default function TopNav() {
             bio: data.bio || "",
           });
         }
+
+        const { data: invites } = await supabase
+          .from("friend_group_invites")
+          .select("id")
+          .eq("invited_user_id", user.id)
+          .is("responded_at", null);
+
+        setHasInvitations(!!invites?.length);
       }
     };
 
@@ -80,7 +89,7 @@ export default function TopNav() {
 
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => router.push("/kalender")}>
+          <Button variant="outline" onClick={() => router.push("/")}>
             Kalendar
           </Button>
           <Button variant="outline" onClick={() => router.push("/events")}>
@@ -94,10 +103,13 @@ export default function TopNav() {
           <>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div>
+                <div className="relative cursor-pointer">
                   <Avatar>
                     <AvatarImage src={userData.avatar_url} />
                   </Avatar>
+                  {hasInvitations && (
+                    <div className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full" />
+                  )}
                 </div>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 p-4">
@@ -109,6 +121,9 @@ export default function TopNav() {
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setEditOpen(true)}>
                   Profil bearbeiten
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/invitations")}>
+                  Einladungen
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
                   Ausloggen
