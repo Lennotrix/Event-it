@@ -61,6 +61,14 @@ export default function UserCard({
 
   async function handleLeaveGroup() {
     const supabase = createClient();
+
+    // Lösche event_invitations für diesen User aus der Gruppe
+    await supabase
+      .from("event_invitations")
+      .delete()
+      .eq("user_id", currentUserId)
+      .eq("group_id", groupId);
+
     const { error } = await supabase
       .from("friend_group_members")
       .delete()
@@ -131,6 +139,14 @@ export default function UserCard({
     if (userId === groupOwnerId) return;
 
     const supabase = createClient();
+
+    // Lösche event_invitations für den gekickten User
+    await supabase
+      .from("event_invitations")
+      .delete()
+      .eq("user_id", userId)
+      .eq("group_id", groupId);
+
     const { error } = await supabase
       .from("friend_group_members")
       .delete()
