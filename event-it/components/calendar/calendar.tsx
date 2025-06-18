@@ -22,41 +22,35 @@ export default function CalendarPage() {
     groupId?: string;
   } | null>(null);
 
-  useEffect(() => {
-    async function fetchEvents() {
-      const supabase = createClient();
-      const { data: user, error: userError } = await supabase.auth.getUser();
+    useEffect(() => {
+        async function fetchEvents() {
+            const supabase = createClient()
+            const { data: user, error: userError } = await supabase.auth.getUser()
 
-      if (userError) {
-        console.error("Error fetching user:", userError);
-        return;
-      }
+            if (userError) {
+                console.error("Error fetching user:", userError)
+                return
+            }
 
-      const { data, error } = await supabase
-        .from("event_invitations")
-        .select("*,events(*,venues(*))")
-        .eq("user_id", user.user?.id);
+            const { data, error } = await supabase
+                .from("event_invitations")
+                .select("*,events(*,venues(*))")
+                .eq("user_id", user.user?.id)
 
-      if (error) {
-        console.error("Error fetching events:", error);
-        return;
-      }
+            if (error) {
+                console.error("Error fetching events:", error)
+                return
+            }
 
-      setEvents(data);
-      setLoaded(true);
-    }
+            setEvents(data)
+            setLoaded(true)
+        }
 
-    fetchEvents().catch(console.error);
-  }, []);
+        fetchEvents().catch(console.error)
+    }, [])
 
   const calendarEvents = useMemo(() => {
-    const seen = new Set();
     return events
-      .filter((e) => {
-        if (seen.has(e.event_id)) return false;
-        seen.add(e.event_id);
-        return true;
-      })
       .map((e) => ({
         title: e.events.name || "Untitled Event",
         start: new Date(e.events.start_time),
@@ -74,13 +68,13 @@ export default function CalendarPage() {
     });
   };
 
-  const handleNavigate = useCallback((newDate: Date) => {
-    setCurrentDate(newDate);
-  }, []);
+    const handleNavigate = useCallback((newDate: Date) => {
+        setCurrentDate(newDate)
+    }, [])
 
-  const handleViewChange = useCallback((newView: View) => {
-    setCurrentView(newView);
-  }, []);
+    const handleViewChange = useCallback((newView: View) => {
+        setCurrentView(newView)
+    }, [])
 
   return (
     <div className="text-foreground bg-background p-2 rounded-xl shadow h-2/3 xl:h-full">

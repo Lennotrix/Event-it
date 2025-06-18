@@ -56,9 +56,6 @@ export default function AddUserPopup({ onCloseAction, groupId }: { onCloseAction
 
     return (
         <>
-            <DialogHeader>
-                <DialogTitle>Welchen Nutzer möchten Sie hinzufügen?</DialogTitle>
-            </DialogHeader>
             <Input value={email} onChange={(e) => setEmail(e.target.value)} type="email" placeholder="your-friend@example.com" />
             <Input value={message} onChange={(e) => setMessage(e.target.value)} type="text" placeholder="Ich möchte dich einladen!" />
             <DialogFooter>

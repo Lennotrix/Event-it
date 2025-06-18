@@ -18,7 +18,7 @@ export function useInvitationListener(userId: string | undefined) {
                     filter: `user_id=eq.${userId}`,
                     handler: async (payload) => {
                         const invitation = payload.new as EventInvitation;
-                        if (!invitation.event_id) return;
+                        if (!invitation.event_id || invitation.status === "accepted") return;
 
                         const { data: event, error } = await supabase
                             .from("events")
