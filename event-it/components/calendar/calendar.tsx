@@ -15,7 +15,6 @@ export default function CalendarPage() {
     const [currentDate, setCurrentDate] = useState(new Date())
     const [currentView, setCurrentView] = useState<View>(Views.WEEK)
     const router = useRouter()
-    const { openPopup } = usePopup()
 
     useEffect(() => {
         async function fetchEvents() {

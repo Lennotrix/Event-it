@@ -68,7 +68,9 @@ export default function UserList({
       return;
     }
 
-    openPopup(<AddUserPopup onCloseAction={closePopup} groupId={groupId} />);
+    openPopup(<AddUserPopup onCloseAction={closePopup} groupId={groupId} />,
+        "Benutzer hinzufügen",
+        "Füge einen neuen Benutzer zur Gruppe hinzu");
   }
 
   return (

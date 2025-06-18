@@ -6,9 +6,11 @@ import {createClient} from "@/utils/supabase/client";
 import {EventWithVenue} from "@/types/exposed";
 import EventDetailsPopup from "@/components/event/EventDetailsPopup";
 import {Button} from "@/components/ui/button";
+import {usePopup} from "@/components/provider/popupProvider";
+import AddEventPopup from "@/components/event/browse/addEventPopup";
 
 export default function BrowseEvent() {
-
+    const {openPopup, closePopup} = usePopup();
     //const [events, setEvents] = useState<EventWithVenue[]>([])
 
     const [events, setEvents] = useState<EventWithVenue[]>([])
@@ -40,6 +42,19 @@ export default function BrowseEvent() {
         fetchEvents()
     }, [])
 
+    async function handleAddEvent(eventId: string) {
+        const supabase = await createClient()
+        const {data: profileData, error: profileError} = await supabase.auth.getUser();
+        if (profileError || !profileData.user) {
+            console.error("Fehler beim Abrufen des Profils:", profileError)
+            return
+        }
+        openPopup(
+            <AddEventPopup eventId={eventId} onCloseAction={closePopup}/>,
+            "Event hinzufügen",
+            "")
+    }
+
     if (events.length === 0) {
         return <p>Loading...</p>
     }
@@ -49,7 +64,7 @@ export default function BrowseEvent() {
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {events.map((event, index) => (
             <Eventelement key={index} event={event}>
-                <Button className="">
+                <Button className="" onClick={() => {handleAddEvent(event.id)}}>
                     Jetzt hinzufügen
                 </Button>
             </Eventelement>

@@ -3,12 +3,12 @@
 
 import {
     Dialog,
-    DialogContent,
+    DialogContent, DialogDescription, DialogHeader, DialogTitle,
 } from '@/components/ui/dialog'
 import { createContext, useContext, useState, ReactNode } from 'react'
 
 type PopupContextType = {
-    openPopup: (content: ReactNode) => void
+    openPopup: (content: ReactNode, title: string, description: string) => void
     closePopup: () => void
 }
 
@@ -23,9 +23,13 @@ export function usePopup() {
 export function PopupProvider({ children }: { children: ReactNode }) {
     const [isOpen, setIsOpen] = useState(false)
     const [popupContent, setPopupContent] = useState<ReactNode>(null)
+    const [title, setTitle] = useState('Popup Title')
+    const [description, setDescription] = useState('Popup Description')
 
-    const openPopup = (content: ReactNode) => {
+    const openPopup = (content: ReactNode, title: string, description: string) => {
         setPopupContent(content)
+        setTitle(title)
+        setDescription(description)
         setIsOpen(true)
     }
 
@@ -39,6 +43,10 @@ export function PopupProvider({ children }: { children: ReactNode }) {
             {children}
             <Dialog open={isOpen} onOpenChange={setIsOpen}>
                 <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                        <DialogTitle>{title}</DialogTitle>
+                        <DialogDescription>{description}</DialogDescription>
+                    </DialogHeader>
                     {popupContent}
                 </DialogContent>
             </Dialog>
