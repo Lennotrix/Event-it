@@ -39,10 +39,11 @@ export default function ChatWindow({
             </ScrollArea>
 
             <form
-                onSubmit={(e) => {
-                    e.preventDefault()
-                    onSendMessageAction(messageInput)
-                }}
+           onSubmit={(e) => {
+    e.preventDefault()
+    onSendMessageAction(messageInput)
+    setMessageInput("") // 🟢 Leert das Eingabefeld
+  }}
                 className="flex gap-2 p-4 border-t bg-background"
             >
                 <Input
