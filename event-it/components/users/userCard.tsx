@@ -61,6 +61,13 @@ export default function UserCard({
 
   async function handleLeaveGroup() {
     const supabase = createClient();
+
+    await supabase
+      .from("event_invitations")
+      .delete()
+      .eq("user_id", currentUserId)
+      .eq("group_id", groupId);
+
     const { error } = await supabase
       .from("friend_group_members")
       .delete()
@@ -131,6 +138,13 @@ export default function UserCard({
     if (userId === groupOwnerId) return;
 
     const supabase = createClient();
+
+    await supabase
+      .from("event_invitations")
+      .delete()
+      .eq("user_id", userId)
+      .eq("group_id", groupId);
+
     const { error } = await supabase
       .from("friend_group_members")
       .delete()
@@ -152,7 +166,6 @@ export default function UserCard({
 
   return (
     <Card className="w-full relative">
-      {/* Krone oben links, wenn Gruppenowner */}
       {userId === groupOwnerId && (
         <div className="absolute top-2 left-2">
           <Crown className="w-5 h-5 text-yellow-500" />
@@ -205,11 +218,12 @@ export default function UserCard({
           {user.first_name} {user.last_name}
         </CardDescription>
       </CardHeader>
-      <CardContent className="relative">
+
+      <CardContent className="relative pb-8">
         <Label>{user.bio}</Label>
-        <span className="absolute bottom-2 right-4 text-xs text-muted-foreground">
+        <Label className="absolute bottom-2 right-2 text-xs text-muted-foreground">
           {user.is_active ? "Aktiv" : "Inaktiv"}
-        </span>
+        </Label>
       </CardContent>
     </Card>
   );
