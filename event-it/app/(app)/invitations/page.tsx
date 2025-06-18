@@ -81,7 +81,7 @@ export default function InvitationsPage() {
     <div className="p-4 space-y-4">
       <h1 className="text-2xl font-bold">Einladungen</h1>
       {invites.length === 0 ? (
-        <p>No pending invitations.</p>
+        <p>Aktuell keine Einladungen</p>
       ) : (
         invites.map((inv) => (
           <Card key={inv.id}>
@@ -92,13 +92,13 @@ export default function InvitationsPage() {
               {inv.message && <p>{inv.message}</p>}
               <div className="flex gap-2">
                 <Button onClick={() => handleAction(inv.id, true)}>
-                  Accept
+                  Akzeptieren
                 </Button>
                 <Button
                   variant="destructive"
                   onClick={() => handleAction(inv.id, false)}
                 >
-                  Decline
+                  Ablehnen
                 </Button>
               </div>
             </CardContent>

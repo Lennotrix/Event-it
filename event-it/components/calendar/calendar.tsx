@@ -49,11 +49,16 @@ export default function CalendarPage() {
 
         fetchEvents().catch(console.error)
     }, [])
-
+    const statusTranslations: Record<'accepted' | 'maybe' | 'pending' | 'declined', string> = {
+        accepted: "Akzeptiert",
+        maybe: "Vielleicht",
+        pending: "Ausstehend",
+        declined: "Abgelehnt",
+    };
     const calendarEvents = useMemo(() => {
         return events.map((e, i) => ({
             id: `${e.event_id}-${e.group_id ?? e.inviter_id}-${e.status}-${i}`, // ensure unique
-            title: `${e.events.name} (${e.status})`, // optional, helps debugging
+            title: `${e.events.name} (${statusTranslations[e.status as keyof typeof statusTranslations] ?? e.status})`, // optional, helps debugging
             start: new Date(e.events.start_time),
             end: new Date(e.events.end_time),
             allDay: false,

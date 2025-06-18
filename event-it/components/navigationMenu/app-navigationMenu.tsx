@@ -50,7 +50,7 @@ export default function TopNav() {
           setUserData({
             id: data.id,
             username: data.username,
-            avatar_url: data.avatar_url ?? "/images/usericon.png",
+            avatar_url: data.avatar_url ?? "",
             first_name: data.first_name || "",
             last_name: data.last_name || "",
             bio: data.bio || "",

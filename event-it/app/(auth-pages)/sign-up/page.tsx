@@ -20,14 +20,14 @@ export default async function SignupPage({
             title="Registrierung"
             description={
                 <>
-                    Hast du bereits einen Account?
+                    Account vorhanden?
                     <Button variant="link" asChild>
                         <a href="/sign-in">Einloggen</a>
                     </Button>
                 </>
             }
             formAction={signUpAction}
-            submitLabel="Sign up"
+            submitLabel="Registrieren"
             message={message}
             >
             <Label htmlFor="username">Benutzername</Label>
