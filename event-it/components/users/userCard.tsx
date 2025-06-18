@@ -61,14 +61,6 @@ export default function UserCard({
 
   async function handleLeaveGroup() {
     const supabase = createClient();
-
-    // Lösche event_invitations für diesen User aus der Gruppe
-    await supabase
-      .from("event_invitations")
-      .delete()
-      .eq("user_id", currentUserId)
-      .eq("group_id", groupId);
-
     const { error } = await supabase
       .from("friend_group_members")
       .delete()
@@ -139,14 +131,6 @@ export default function UserCard({
     if (userId === groupOwnerId) return;
 
     const supabase = createClient();
-
-    // Lösche event_invitations für den gekickten User
-    await supabase
-      .from("event_invitations")
-      .delete()
-      .eq("user_id", userId)
-      .eq("group_id", groupId);
-
     const { error } = await supabase
       .from("friend_group_members")
       .delete()
@@ -221,15 +205,11 @@ export default function UserCard({
           {user.first_name} {user.last_name}
         </CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="relative">
         <Label>{user.bio}</Label>
-        <Label
-          className={
-            user.is_active ? "text-destructive-foreground" : "text-green-500"
-          }
-        >
+        <span className="absolute bottom-2 right-4 text-xs text-muted-foreground">
           {user.is_active ? "Aktiv" : "Inaktiv"}
-        </Label>
+        </span>
       </CardContent>
     </Card>
   );
