@@ -81,7 +81,7 @@ export default function InvitationsPage() {
     <div className="p-4 space-y-4">
       <h1 className="text-2xl font-bold">Einladungen</h1>
       {invites.length === 0 ? (
-        <p>No pending invitations.</p>
+        <p>Aktuell keine Einladungen</p>
       ) : (
         invites.map((inv) => (
           <Card key={inv.id}>

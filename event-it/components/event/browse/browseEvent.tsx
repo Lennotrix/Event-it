@@ -56,7 +56,7 @@ export default function BrowseEvent() {
     }
 
     if (events.length === 0) {
-        return <p>Loading...</p>
+        return <p>Keine Events gefunden</p>
     }
 
         return (

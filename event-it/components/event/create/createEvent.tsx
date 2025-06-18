@@ -276,14 +276,14 @@ export default function CreateEventForm() {
                                 valueAsNumber: true,
                                 setValueAs: (v) => v === '' ? null : Number(v)
                             })}
-                            placeholder="Enter maximum number of attendees"
+                            placeholder="1"
                         />
                         {errors.max_attendees && <p className="text-red-500 text-sm">{errors.max_attendees.message}</p>}
                     </div>
 
                     <div>
                         <Label>Bild URL (optional)</Label>
-                        <Input {...register('image_url')} placeholder="Enter image URL"/>
+                        <Input {...register('image_url')} placeholder="Bild-URL eingeben"/>
                         {errors.image_url && <p className="text-red-500 text-sm">{errors.image_url.message}</p>}
                     </div>
 
@@ -292,14 +292,14 @@ export default function CreateEventForm() {
                         control={control}
                         render={({ field }) => (
                             <div>
-                                <Label>Öffentlich?</Label>
+                                <Label>Öffentliches Event</Label>
                                 <Switch checked={field.value} onCheckedChange={field.onChange} />
                             </div>
                         )}
                     />
 
                     <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? 'Creating Event...' : 'Create Event'}
+                        {isSubmitting ? 'Erstelle Event...' : 'Event erstellen'}
                     </Button>
                 </form>
             </CardContent>

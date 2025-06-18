@@ -47,7 +47,7 @@ export default function BrowseMyEvent() {
 
         const supabase = await createClient()
         const { error } = await supabase
-            .from("events") // Tabelle in Supabase
+            .from("events")
             .delete()
             .eq("id", id);
 
@@ -60,7 +60,7 @@ export default function BrowseMyEvent() {
 
 
     if (events.length === 0) {
-        return <p>Loading...</p>
+        return <p>Keine Events gefunden</p>
     }
 
     return (
