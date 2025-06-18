@@ -29,7 +29,7 @@ export default function TopNav() {
   } | null>(null);
 
   const [editOpen, setEditOpen] = useState(false);
-  const [hasInvitations, setHasInvitations] = useState(false);
+  const [invitationCount, setInvitationCount] = useState(0);
   const router = useRouter();
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export default function TopNav() {
           .eq("invited_user_id", user.id)
           .is("responded_at", null);
 
-        setHasInvitations(!!invites?.length);
+        setInvitationCount(invites?.length ?? 0);
       }
     };
 
@@ -107,7 +107,7 @@ export default function TopNav() {
                   <Avatar>
                     <AvatarImage src={userData.avatar_url} />
                   </Avatar>
-                  {hasInvitations && (
+                  {invitationCount > 0 && (
                     <div className="absolute top-0 right-0 w-3 h-3 bg-red-500 rounded-full" />
                   )}
                 </div>
@@ -123,7 +123,7 @@ export default function TopNav() {
                   Profil bearbeiten
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/invitations")}>
-                  Einladungen
+                  Einladungen{invitationCount > 0 && ` (${invitationCount})`}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
                   Ausloggen
