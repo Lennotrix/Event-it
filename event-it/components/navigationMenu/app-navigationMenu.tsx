@@ -11,7 +11,7 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/utils/supabase/client";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
 import { Breadcrumbs } from "@/components/navigationMenu/breadcrumps";
 import { ThemeToggle } from "@/components/navigationMenu/themeToggle";
 import { Label } from "@/components/ui/label";
@@ -49,7 +49,7 @@ export default function TopNav() {
           setUserData({
             id: data.id,
             username: data.username,
-            avatar_url: data.avatar_url ?? "/fallback.png",
+            avatar_url: data.avatar_url ?? "/images/default.png",
             first_name: data.first_name || "",
             last_name: data.last_name || "",
             bio: data.bio || "",
@@ -80,11 +80,11 @@ export default function TopNav() {
 
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
-          <Button variant="outline" onClick={() => router.push("/kalender")}>
-            Kalendar
-          </Button>
           <Button variant="outline" onClick={() => router.push("/events")}>
             Events
+          </Button>
+          <Button variant="outline" onClick={() => router.push("/events/create")}>
+            Event erstellen
           </Button>
         </div>
 
@@ -96,7 +96,12 @@ export default function TopNav() {
               <DropdownMenuTrigger asChild>
                 <div>
                   <Avatar>
-                    <AvatarImage src={userData.avatar_url} />
+                    <AvatarImage src={
+                      userData.avatar_url
+                          ? userData.avatar_url
+                          : "/images/usericon.png"
+                    }
+                    />
                   </Avatar>
                 </div>
               </DropdownMenuTrigger>
@@ -107,10 +112,13 @@ export default function TopNav() {
                 >
                   <Label>Eingeloggt als: {userData.username}</Label>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => setEditOpen(true)}>
                   Profil bearbeiten
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout}>
+                <DropdownMenuItem className="cursor-pointer" onClick={() => router.push("/events/me")}>
+                  Meine Events
+                </DropdownMenuItem>
+                <DropdownMenuItem className="cursor-pointer" onClick={handleLogout}>
                   Ausloggen
                 </DropdownMenuItem>
               </DropdownMenuContent>

@@ -5,10 +5,14 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
 export const signUpAction = async (formData: FormData) => {
+  const supabase = await createClient();
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
   const redirectTo = formData.get("redirect")?.toString() || "/";
-  const supabase = await createClient();
+  const first_name = formData.get("name")?.toString();
+  const last_name = formData.get("lastname")?.toString();
+  const username = formData.get("username")?.toString();
+
 
   if (!email || !password) {
     return encodedRedirect(
@@ -23,9 +27,11 @@ export const signUpAction = async (formData: FormData) => {
     email,
     password,
     options: {
-      emailRedirectTo: `${baseUrl}/auth/callback`,
+      emailRedirectTo: `${baseUrl}/auth/signup?username=${username}&first_name=${first_name}&last_name=${last_name}&email=${email}`,
     },
   });
+
+
 
   if (error) {
     console.error(error.code + " " + error.message);
