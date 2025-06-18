@@ -17,8 +17,10 @@ export default function CalendarPage() {
     const [currentView, setCurrentView] = useState<View>(Views.WEEK)
     const router = useRouter()
     const { openPopup } = usePopup()
-    const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
-
+ const [selectedEvent, setSelectedEvent] = useState<{
+  eventId: string
+  groupId?: string
+} | null>(null)
 
     useEffect(() => {
         async function fetchEvents() {
@@ -59,9 +61,12 @@ export default function CalendarPage() {
         })
     }, [events])
 
-   const handleSelectEvent = (event: any) => {
-    const originalData = event.resource
-    setSelectedEventId(originalData.event_id)
+const handleSelectEvent = (event: any) => {
+  const originalData = event.resource
+  setSelectedEvent({
+    eventId: originalData.event_id,
+    groupId: originalData.group_id,
+  })
 }
 
 
@@ -92,12 +97,13 @@ export default function CalendarPage() {
                     }}
                 />
             )}
-           {selectedEventId && (
-            <EventDetailsPopup
-                eventId={selectedEventId}
-                onClose={() => setSelectedEventId(null)}
-            />
-            )}
+         {selectedEvent && (
+  <EventDetailsPopup
+    eventId={selectedEvent.eventId}
+    groupId={selectedEvent.groupId}
+    onClose={() => setSelectedEvent(null)}
+  />
+)}
         </div>
     )
 }

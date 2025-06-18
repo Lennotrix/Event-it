@@ -119,7 +119,7 @@ const [currentUserId, setCurrentUserId] = useState<string | null>(null)
 
   const maxCount = Math.max(counts.accepted, counts.maybe, counts.declined, 1)
 
-  
+
 
   return (
   <Dialog open onOpenChange={(open) => !open && onClose()}>
@@ -232,13 +232,18 @@ const [currentUserId, setCurrentUserId] = useState<string | null>(null)
             </div>
           </div>
 
+
+
+
           {/* Right: Chat */}
           <div className="w-1/3 flex flex-col h-full overflow-hidden">
             <div className="p-4 border-b">
               <h2 className="text-xl font-semibold text-foreground">Chat</h2>
             </div>
             <div className="flex-1 overflow-hidden p-2">
-              <Chat eventId={eventId} recipientId={currentUserId!} />
+                          {groupId && (
+  <Chat eventId={eventId} groupId={groupId} />
+)}
             </div>
           </div>
         </div>
