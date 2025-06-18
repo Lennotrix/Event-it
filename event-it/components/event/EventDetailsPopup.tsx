@@ -47,7 +47,7 @@ export default function EventDetailsPopup({
   const [inviteData, setInviteData] = useState<Record<string, InviteInfo>>({})
   const [counts, setCounts] = useState({ accepted: 0, maybe: 0, declined: 0 })
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
-
+const [recipientId, setRecipientId] = useState<string | null>(null)
   const priority: Record<string, number> = { accepted: 3, maybe: 2, declined: 1 }
 
   const loadData = async () => {
@@ -69,14 +69,21 @@ export default function EventDetailsPopup({
         .single()
       if (ev) setEventInfo(ev as any)
 
-      let q = supabase
-        .from('event_invitations')
-        .select('user_id, status, notes, accepted_at')
-        .eq('event_id', eventId)
-        .in('status', ['accepted', 'maybe', 'declined'])
+     let q = supabase
+  .from('event_invitations')
+  .select('user_id, status, notes, accepted_at')
+  .eq('event_id', eventId)
+  .in('status', ['accepted', 'maybe', 'declined'])
 
-      if (groupId) q = q.eq('group_id', groupId)
+    if (groupId) {
+      q = q.eq('group_id', groupId)
+    } else if (inviterId) {
+      q = q.eq('inviter_id', inviterId).is('group_id', null)
+    }
+
+  
       const { data: invs = [], error } = await q
+
       if (error) throw error
 
       const dedup: Record<string, InviteInfo> = {}
@@ -88,6 +95,14 @@ export default function EventDetailsPopup({
         }
       })
       setInviteData(dedup)
+
+if (!groupId && uid) {
+  const otherId = Object.keys(dedup).find(id => id !== uid) || null
+  setRecipientId(otherId)
+}
+
+const allIds = Object.keys(dedup)
+
 
       const vals = Object.values(dedup)
       setCounts({
@@ -273,7 +288,13 @@ const handleStatusChange = async (newStatus: 'accepted' | 'maybe' | 'declined') 
                 <h2 className="text-xl font-semibold text-foreground">Chat</h2>
               </div>
               <div className="flex-1 overflow-hidden p-2">
-                {groupId && <Chat eventId={eventId} groupId={groupId} />}
+               {groupId ? (
+  <Chat eventId={eventId} groupId={groupId} />
+) : recipientId ? (
+  <Chat eventId={eventId} recipientId={recipientId} />
+) : (
+  <div className="text-center text-sm text-muted-foreground">Kein Chat verfügbar</div>
+)}
               </div>
             </div>
           </div>
