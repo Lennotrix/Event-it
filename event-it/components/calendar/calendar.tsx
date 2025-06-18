@@ -1,16 +1,20 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo, useCallback } from "react"
 import { createClient } from "@/utils/supabase/client"
-import { Calendar } from "@/components/ui/calendar"
-import { isSameDay, parseISO, isWithinInterval, eachDayOfInterval } from "date-fns"
+import { Calendar as BigCalendar, Views, View } from "react-big-calendar"
+import {localizer} from "@/lib/calendarLocalizer"
+import "react-big-calendar/lib/css/react-big-calendar.css"
+import "@/styles/calendar-dark.css"
 import { usePopup } from "@/components/provider/popupProvider"
-import { DayViewDialog } from "@/components/calendar/dayViewPopup"
+import {useRouter} from "next/navigation";
 
 export default function CalendarPage() {
-    const [selectedDate, setSelectedDate] = useState<Date | null>(null)
     const [events, setEvents] = useState<any[]>([])
     const [loaded, setLoaded] = useState(false)
+    const [currentDate, setCurrentDate] = useState(new Date())
+    const [currentView, setCurrentView] = useState<View>(Views.WEEK)
+    const router = useRouter()
     const { openPopup } = usePopup()
 
     useEffect(() => {
@@ -40,82 +44,47 @@ export default function CalendarPage() {
         fetchEvents().catch(console.error)
     }, [])
 
-    const eventDatesByStatus: Record<
-        "pending" | "accepted" | "declined" | "maybe" | "expired",
-        Date[]
-    > = {
-        pending: [],
-        accepted: [],
-        declined: [],
-        maybe: [],
-        expired: [],
-    }
-
-    // Expand events over their date ranges
-    events?.forEach((e) => {
-        const status = e.status as keyof typeof eventDatesByStatus
-        const start = parseISO(e.events.start_time)
-        const end = parseISO(e.events.end_time)
-
-        const allDates = eachDayOfInterval({ start, end })
-        eventDatesByStatus[status].push(...allDates)
-    })
-
-    const handleDayClick = (day: Date) => {
-        const matchedEvents = events.filter((e) => {
-            const start = parseISO(e.events.start_time)
-            const end = parseISO(e.events.end_time)
-            return isWithinInterval(day, { start, end })
-        })
-
-        if (matchedEvents.length > 0) {
-            setSelectedDate(day)
-        } else {
-            setSelectedDate(null)
-        }
-
-        openPopup(<DayViewDialog date={day ?? new Date()} />)
-    }
-
-    function getStatusesForDay(day: Date): string[] {
-        const statuses: string[] = []
-
-        for (const status of Object.keys(eventDatesByStatus)) {
-            if ((eventDatesByStatus as any)[status].some((d: Date) => isSameDay(d, day))) {
-                statuses.push(status)
+    const calendarEvents = useMemo(() => {
+        return events.map((e) => {
+            return {
+                title: e.events.name || "Untitled Event",
+                start: new Date(e.events.start_time),
+                end: new Date(e.events.end_time),
+                allDay: false,
+                resource: e,
             }
-        }
+        })
+    }, [events])
 
-        return statuses
+    const handleSelectEvent = (event: any) => {
+        const originalData = event.resource
+        router.push(`/events/${originalData.event_id}`)
     }
+
+    const handleNavigate = useCallback((newDate: Date) => {
+        setCurrentDate(newDate)
+    }, [])
+
+    const handleViewChange = useCallback((newView: View) => {
+        setCurrentView(newView)
+    }, [])
 
     return (
-        <div className="flex flex-col items-center gap-4">
+        <div className="text-foreground bg-background p-2 rounded-xl shadow h-2/3 xl:h-full">
             {loaded && (
-                <Calendar
-                    weekStartsOn={1}
-                    animate={true}
-                    mode="single"
-                    selected={selectedDate ?? undefined}
-                    onDayClick={handleDayClick}
-                    modifiers={{
-                        pending: (date) =>
-                            eventDatesByStatus.pending.some((d) => isSameDay(d, date)),
-                        accepted: (date) =>
-                            eventDatesByStatus.accepted.some((d) => isSameDay(d, date)),
-                        declined: (date) =>
-                            eventDatesByStatus.declined.some((d) => isSameDay(d, date)),
-                        maybe: (date) =>
-                            eventDatesByStatus.maybe.some((d) => isSameDay(d, date)),
-                        expired: (date) =>
-                            eventDatesByStatus.expired.some((d) => isSameDay(d, date)),
-                    }}
-                    modifiersClassNames={{
-                        pending: "bg-yellow-200 text-yellow-800 rounded",
-                        accepted: "bg-green-200 text-green-800 rounded",
-                        declined: "bg-red-200 text-red-800 rounded",
-                        maybe: "bg-yellow-200 text-yellow-800 rounded",
-                        expired: "bg-gray-200 text-gray-800 rounded",
+                <BigCalendar
+                    localizer={localizer}
+                    events={calendarEvents}
+                    startAccessor="start"
+                    endAccessor="end"
+                    view={currentView}
+                    onView={handleViewChange}
+                    date={currentDate}
+                    onNavigate={handleNavigate}
+                    onSelectEvent={handleSelectEvent}
+                    formats={{
+                        timeGutterFormat: (date, culture, localizer) =>
+                            localizer!.format(date, "HH:mm", culture),
                     }}
                 />
             )}

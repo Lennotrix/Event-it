@@ -108,3 +108,8 @@
     @apply text-destructive font-medium !important;
   }
 }
+
+html, body {
+  height: 100%;
+  width: 100%;
+}
