@@ -93,9 +93,11 @@ export default function UserList({
       </CardContent>
 
       <CardFooter className={"flex items-center justify-center"}>
-        <Button variant={"outline"} onClick={handleAddUser}>
-          <Plus />
-        </Button>
+        {currentUserId === groupOwnerId && (
+          <Button variant={"outline"} onClick={handleAddUser}>
+            <Plus />
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

@@ -5,6 +5,7 @@ import {useEffect, useState} from "react";
 import {createClient} from "@/utils/supabase/client";
 import {EventWithVenue} from "@/types/exposed";
 import EventDetailsPopup from "@/components/event/EventDetailsPopup";
+import {Button} from "@/components/ui/button";
 
 export default function BrowseEvent() {
 
@@ -46,12 +47,12 @@ export default function BrowseEvent() {
         return (
         <>
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {events.map(event => (
-          <Eventelement
-            key={event.id}
-            event={event}
-            onImageClick={() => setSelectedEventId(event.id)}
-          />
+        {events.map((event, index) => (
+            <Eventelement key={index} event={event}>
+                <Button className="">
+                    Jetzt hinzufügen
+                </Button>
+            </Eventelement>
         ))}
       </div>
 
