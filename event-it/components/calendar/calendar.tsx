@@ -8,6 +8,7 @@ import "react-big-calendar/lib/css/react-big-calendar.css"
 import "@/styles/calendar-dark.css"
 import { usePopup } from "@/components/provider/popupProvider"
 import {useRouter} from "next/navigation";
+import EventDetailsPopup from "@/components/event/EventDetailsPopup"
 
 export default function CalendarPage() {
     const [events, setEvents] = useState<any[]>([])
@@ -16,6 +17,8 @@ export default function CalendarPage() {
     const [currentView, setCurrentView] = useState<View>(Views.WEEK)
     const router = useRouter()
     const { openPopup } = usePopup()
+    const [selectedEventId, setSelectedEventId] = useState<string | null>(null)
+
 
     useEffect(() => {
         async function fetchEvents() {
@@ -56,10 +59,11 @@ export default function CalendarPage() {
         })
     }, [events])
 
-    const handleSelectEvent = (event: any) => {
-        const originalData = event.resource
-        router.push(`/events/${originalData.event_id}`)
-    }
+   const handleSelectEvent = (event: any) => {
+    const originalData = event.resource
+    setSelectedEventId(originalData.event_id)
+}
+
 
     const handleNavigate = useCallback((newDate: Date) => {
         setCurrentDate(newDate)
@@ -87,6 +91,12 @@ export default function CalendarPage() {
                             localizer!.format(date, "HH:mm", culture),
                     }}
                 />
+            )}
+           {selectedEventId && (
+            <EventDetailsPopup
+                eventId={selectedEventId}
+                onClose={() => setSelectedEventId(null)}
+            />
             )}
         </div>
     )

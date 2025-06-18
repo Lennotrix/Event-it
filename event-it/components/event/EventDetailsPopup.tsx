@@ -122,127 +122,132 @@ const [currentUserId, setCurrentUserId] = useState<string | null>(null)
   
 
   return (
-    <Dialog open onOpenChange={(open) => !open && onClose()}>
-      <DialogPortal>
-        <DialogOverlay className="fixed inset-0 bg-black/50" />
-        <DialogContent className="fixed top-1/2 left-1/2  w-[80vw] max-w-none h-[70vh] -translate-x-1/2 -translate-y-1/2 p-0 bg-popover text-popover-foreground overflow-hidden">
+  <Dialog open onOpenChange={(open) => !open && onClose()}>
+    <DialogPortal>
+      <DialogOverlay className="fixed inset-0 bg-black/50" />
+      <DialogContent className="fixed top-1/2 left-1/2 w-[80vw] max-w-none h-[70vh] -translate-x-1/2 -translate-y-1/2 p-0 bg-popover text-popover-foreground overflow-hidden flex flex-col">
 
+        <DialogTitle className="sr-only">{eventInfo?.name}</DialogTitle>
 
-      <DialogTitle className="sr-only">
-  {eventInfo?.name}
-</DialogTitle>         
+        <div className="flex flex-1 overflow-hidden">
+          {/* Left: Info + Statusbars */}
+          <div className="w-1/3 flex flex-col h-full overflow-hidden border-r">
+            {/* Info-Bereich (Header bleibt fix) */}
+            {eventInfo && (
+              <div className="p-4 border-b flex items-center space-x-4">
+                {eventInfo.image_url && (
+                  <img
+                    src={eventInfo.image_url}
+                    alt={eventInfo.name}
+                    className="w-20 h-20 rounded-md object-cover"
+                  />
+                )}
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground">{eventInfo.name}</h2>
+                  <p className="text-sm text-muted-foreground">
+                    {new Date(eventInfo.start_time).toLocaleDateString()} –{' '}
+                    {new Date(eventInfo.start_time).toLocaleTimeString()}
+                  </p>
+                </div>
+              </div>
+            )}
 
-          <div className="flex h-full">
-            {/* Left: Status Bars */}
-            <div className="w-1/4 border-r flex flex-col">
-              {/* Header in left column */}
-              {eventInfo && (
-                <div className="p-4 border-b flex items-center space-x-4">
-                  {eventInfo.image_url && (
-                    <img
-                      src={eventInfo.image_url}
-                      alt={eventInfo.name}
-                      className="w-20 h-20 rounded-md object-cover"
-                    />
-                  )}
-                  <div>
-                    <h2 className="text-xl font-semibold text-foreground">{eventInfo.name}</h2>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(eventInfo.start_time).toLocaleDateString()} –{' '}
-                      {new Date(eventInfo.start_time).toLocaleTimeString()}
+            {/* Stimmen scrollen separat */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {(['accepted', 'maybe', 'declined'] as const).map(status => {
+                const track = 'bg-muted'
+                const fill = status === 'accepted'
+                  ? 'bg-green-500 dark:bg-green-400'
+                  : status === 'maybe'
+                  ? 'bg-yellow-500 dark:bg-yellow-400'
+                  : 'bg-red-500 dark:bg-red-400'
+                const tick = status === 'accepted'
+                  ? 'bg-green-700 dark:bg-green-600'
+                  : status === 'maybe'
+                  ? 'bg-yellow-700 dark:bg-yellow-600'
+                  : 'bg-red-700 dark:bg-red-600'
+                const count = counts[status]
+                const widthPct = (count / maxCount) * 100
+                return (
+                  <div key={status}>
+                    <div className={`h-12 w-full rounded-full relative overflow-hidden ${track}`}>
+                      <div className={`${fill} h-full rounded-full`} style={{ width: `${widthPct}%` }} />
+                      {Array.from({ length: count }).map((_, i) => (
+                        <div
+                          key={i}
+                          className={`${tick} absolute w-0.5 h-full`}
+                          style={{ left: `${((i + 1) / (count + 1)) * 100}%` }}
+                        />
+                      ))}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1 capitalize">
+                      {status}: {count}
                     </p>
                   </div>
-                </div>
-              )}
-              <div className="flex-1 p-4 flex flex-col justify-start space-y-4">
-                {(['accepted', 'maybe', 'declined'] as const).map(status => {
-                  const track = 'bg-muted'
-                  const fill = status === 'accepted'
-                    ? 'bg-green-500 dark:bg-green-400'
-                    : status === 'maybe'
-                    ? 'bg-yellow-500 dark:bg-yellow-400'
-                    : 'bg-red-500 dark:bg-red-400'
-                  const tick = status === 'accepted'
-                    ? 'bg-green-700 dark:bg-green-600'
-                    : status === 'maybe'
-                    ? 'bg-yellow-700 dark:bg-yellow-600'
-                    : 'bg-red-700 dark:bg-red-600'
-                  const count = counts[status]
-                  const widthPct = (count / maxCount) * 100
-                  return (
-                    <div key={status}>
-                      <div className={`h-12 w-full rounded-full relative overflow-hidden ${track}`}>
-                        <div
-                          className={`${fill} h-full rounded-full`} 
-                          style={{ width: `${widthPct}%` }}
-                        />
-                        {Array.from({ length: count }).map((_, i) => (
-                          <div
-                            key={i}
-                            className={`${tick} absolute w-0.5 h-full`} 
-                            style={{ left: `${((i + 1) / (count + 1)) * 100}%` }}
-                          />
-                        ))}
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-1 capitalize">
-                        {status}: {count}
-                      </p>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Middle: Participants List */}
-            <div className="w-1/4 p-6 overflow-y-auto flex flex-col">
-              <h2 className="text-xl font-semibold mb-4 text-center text-foreground">Teilnehmerübersicht</h2>
-              <div className="space-y-4 flex-1 overflow-y-auto">
-                {Object.entries(inviteData).map(([uid, info]) => {
-                  const prof = profiles[uid]
-                  const nameCls = info.status === 'accepted'
-                    ? 'text-green-600 dark:text-green-400'
-                    : info.status === 'maybe'
-                    ? 'text-yellow-600 dark:text-yellow-400'
-                    : 'text-red-600 dark:text-red-400'
-                  return (
-                    <div key={uid} className="flex items-center p-3 border rounded-lg space-x-3">
-                      <Avatar className="w-8 h-8">
-                        {prof?.avatar_url ? (
-                          <AvatarImage
-                            src={prof.avatar_url}
-                            alt={prof.username ?? 'Avatar'}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <AvatarFallback>{prof?.username?.[0] ?? '?'}</AvatarFallback>
-                        )}
-                      </Avatar>
-                      <div>
-                        <p className={`font-medium ${nameCls}`}>{prof?.username ?? 'Unbekannt'}</p>
-                        {info.accepted_at && (
-                          <p className="text-xs text-muted-foreground">
-                            Akzeptiert am {new Date(info.accepted_at).toLocaleString()}
-                          </p>
-                        )}
-                        {info.notes && <p className="text-sm text-muted-foreground">Notiz: {info.notes}</p>}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Right: Chat Placeholder */}
-            <div className="w-1/4 border-l p-4 bg-secondary flex flex-col">
-              <h2 className="text-xl font-semibold mb-4 text-foreground">Chat</h2>
-             <div className="flex-1 overflow-hidden">
-              <Chat eventId={eventId}  recipientId={currentUserId!}  />
-            </div>
-
+                )
+              })}
             </div>
           </div>
-        </DialogContent>
-      </DialogPortal>
-    </Dialog>
-  )
+
+          {/* Middle: Teilnehmerübersicht */}
+          <div className="w-1/3 flex flex-col h-full overflow-hidden border-r">
+            <div className="p-4 border-b">
+              <h2 className="text-xl font-semibold text-center text-foreground">Teilnehmerübersicht</h2>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {Object.entries(inviteData).map(([uid, info]) => {
+                const prof = profiles[uid]
+                const nameCls = info.status === 'accepted'
+                  ? 'text-green-600 dark:text-green-400'
+                  : info.status === 'maybe'
+                  ? 'text-yellow-600 dark:text-yellow-400'
+                  : 'text-red-600 dark:text-red-400'
+                return (
+                  <div key={uid} className="flex items-center p-3 border rounded-lg space-x-3">
+                    <Avatar className="w-8 h-8">
+                      {prof?.avatar_url ? (
+                        <AvatarImage
+                          src={prof.avatar_url}
+                          alt={prof.username ?? 'Avatar'}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <AvatarFallback>{prof?.username?.[0] ?? '?'}</AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div>
+                      <p className={`font-medium ${nameCls}`}>{prof?.username ?? 'Unbekannt'}</p>
+                      {info.accepted_at && (
+                        <p className="text-xs text-muted-foreground">
+                          Akzeptiert am {new Date(info.accepted_at).toLocaleString()}
+                        </p>
+                      )}
+                      {info.notes && (
+                        <p className="text-sm text-muted-foreground">Notiz: {info.notes}</p>
+                      )}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Right: Chat */}
+          <div className="w-1/3 flex flex-col h-full overflow-hidden">
+            <div className="p-4 border-b">
+              <h2 className="text-xl font-semibold text-foreground">Chat</h2>
+            </div>
+            <div className="flex-1 overflow-hidden p-2">
+              <Chat eventId={eventId} recipientId={currentUserId!} />
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </DialogPortal>
+  </Dialog>
+)
+
+
 }
+
+
