@@ -11,6 +11,7 @@ import {
 } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import Chat from "@/components/chat/chat"
+import {Input} from "@/components/ui/input";
 
 interface InviteInfo {
   status: string
@@ -47,6 +48,7 @@ export default function EventDetailsPopup({
   const [inviteData, setInviteData] = useState<Record<string, InviteInfo>>({})
   const [counts, setCounts] = useState({ accepted: 0, maybe: 0, declined: 0 })
   const [currentUserId, setCurrentUserId] = useState<string | null>(null)
+  const [notes, setNotes] = useState<string>("")
 
   const priority: Record<string, number> = { accepted: 3, maybe: 2, declined: 1 }
 
@@ -140,6 +142,24 @@ const handleStatusChange = async (newStatus: 'accepted' | 'maybe' | 'declined') 
   await loadData() // 🟢 direkt neue Daten laden, ohne das Modal zu schließen
 }
 
+const handleAddNote = async () => {
+    if (!currentUserId) return
+    const supabase = createClient()
+
+    const { error } = await supabase
+        .from('event_invitations')
+        .update({ notes: notes })
+        .eq('event_id', eventId)
+        .eq('user_id', currentUserId)
+
+    if (error) {
+        toast.error("Notiz konnte nicht hinzugefügt werden.")
+        return
+    }
+
+    await loadData()
+}
+
   if (loading) return <div className="text-center p-8">Lade Daten…</div>
 
   const maxCount = Math.max(counts.accepted, counts.maybe, counts.declined, 1)
@@ -155,72 +175,80 @@ const handleStatusChange = async (newStatus: 'accepted' | 'maybe' | 'declined') 
             {/* Left: Infos + Vote */}
             <div className="w-1/3 flex flex-col h-full overflow-hidden border-r">
               {eventInfo && (
-                <div className="p-4 border-b flex items-center space-x-4">
-                  {eventInfo.image_url && (
-                    <img
-                      src={eventInfo.image_url}
-                      alt={eventInfo.name}
-                      className="w-20 h-20 rounded-md object-cover"
-                    />
-                  )}
-                  <div>
-                    <h2 className="text-xl font-semibold text-foreground">{eventInfo.name}</h2>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(eventInfo.start_time).toLocaleDateString()} –{' '}
-                      {new Date(eventInfo.start_time).toLocaleTimeString()}
-                    </p>
+                  <div className="p-4 border-b flex items-center space-x-4">
+                    {eventInfo.image_url && (
+                        <img
+                            src={eventInfo.image_url}
+                            alt={eventInfo.name}
+                            className="w-20 h-20 rounded-md object-cover"
+                        />
+                    )}
+                    <div>
+                      <h2 className="text-xl font-semibold text-foreground">{eventInfo.name}</h2>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(eventInfo.start_time).toLocaleDateString()} –{' '}
+                        {new Date(eventInfo.start_time).toLocaleTimeString()}
+                      </p>
+                    </div>
                   </div>
-                </div>
               )}
 
               {currentUserId && (
-                <div className="p-4 border-b flex gap-2">
-                  {(['accepted', 'maybe', 'declined'] as const).map((status) => (
-                    <Button
-                      key={status}
-                      variant="outline"
-                      onClick={() => handleStatusChange(status)}
-                      className={inviteData[currentUserId]?.status === status ? "border-2 border-primary" : ""}
-                    >
-                      {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </Button>
-                  ))}
-                </div>
+                  <div className="p-4 border-b flex gap-2">
+                    {(['accepted', 'maybe', 'declined'] as const).map((status) => (
+                        <Button
+                            key={status}
+                            variant="outline"
+                            onClick={() => handleStatusChange(status)}
+                            className={inviteData[currentUserId]?.status === status ? "border-2 border-primary" : ""}
+                        >
+                          {status.charAt(0).toUpperCase() + status.slice(1)}
+                        </Button>
+                    ))}
+                  </div>
               )}
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {(['accepted', 'maybe', 'declined'] as const).map(status => {
                   const track = 'bg-muted'
                   const fill = status === 'accepted'
-                    ? 'bg-green-500 dark:bg-green-400'
-                    : status === 'maybe'
-                      ? 'bg-yellow-500 dark:bg-yellow-400'
-                      : 'bg-red-500 dark:bg-red-400'
+                      ? 'bg-green-500 dark:bg-green-400'
+                      : status === 'maybe'
+                          ? 'bg-yellow-500 dark:bg-yellow-400'
+                          : 'bg-red-500 dark:bg-red-400'
                   const tick = status === 'accepted'
-                    ? 'bg-green-700 dark:bg-green-600'
-                    : status === 'maybe'
-                      ? 'bg-yellow-700 dark:bg-yellow-600'
-                      : 'bg-red-700 dark:bg-red-600'
+                      ? 'bg-green-700 dark:bg-green-600'
+                      : status === 'maybe'
+                          ? 'bg-yellow-700 dark:bg-yellow-600'
+                          : 'bg-red-700 dark:bg-red-600'
                   const count = counts[status]
                   const widthPct = (count / maxCount) * 100
                   return (
-                    <div key={status}>
-                      <div className={`h-12 w-full rounded-full relative overflow-hidden ${track}`}>
-                        <div className={`${fill} h-full rounded-full`} style={{ width: `${widthPct}%` }} />
-                        {Array.from({ length: count }).map((_, i) => (
-                          <div
-                            key={i}
-                            className={`${tick} absolute w-0.5 h-full`}
-                            style={{ left: `${((i + 1) / (count + 1)) * 100}%` }}
-                          />
-                        ))}
+                      <div key={status}>
+                        <div className={`h-12 w-full rounded-full relative overflow-hidden ${track}`}>
+                          <div className={`${fill} h-full rounded-full`} style={{width: `${widthPct}%`}}/>
+                          {Array.from({length: count}).map((_, i) => (
+                              <div
+                                  key={i}
+                                  className={`${tick} absolute w-0.5 h-full`}
+                                  style={{left: `${((i + 1) / (count + 1)) * 100}%`}}
+                              />
+                          ))}
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-1 capitalize">
+                          {status}: {count}
+                        </p>
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1 capitalize">
-                        {status}: {count}
-                      </p>
-                    </div>
                   )
                 })}
+              </div>
+              <div className="mt-auto p-4 border-t flex items-center justify-between gap-2">
+                <Input
+                    placeholder="Notiz"
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                />
+                <Button onClick={() => handleAddNote()}>Hinzufügen</Button>
               </div>
             </div>
 

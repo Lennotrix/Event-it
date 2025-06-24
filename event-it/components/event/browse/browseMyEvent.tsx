@@ -6,11 +6,15 @@ import {createClient} from "@/utils/supabase/client";
 import {EventWithVenue} from "@/types/exposed";
 import {Button} from "@/components/ui/button";
 import {useRouter } from "next/navigation";
+import {Settings, Trash, UserPlus} from "lucide-react";
+import {usePopup} from "@/components/provider/popupProvider";
+import AddEventPopup from "@/components/event/browse/addEventPopup";
 
 export default function BrowseMyEvent() {
 
     const router = useRouter()
     const [events, setEvents] = useState<EventWithVenue[]>([])
+    const { openPopup, closePopup } = usePopup();
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -58,6 +62,13 @@ export default function BrowseMyEvent() {
         }
     };
 
+    const handleAddFriend = async (event: EventWithVenue) => {
+        openPopup(
+            <AddEventPopup eventId={event.id} onCloseAction={closePopup} />,
+            "Freunde hinzufügen",
+            `Welche Freunde möchten Sie zu "${event.name}" hinzufügen?`);
+    }
+
 
     if (events.length === 0) {
         return <p>Loading...</p>
@@ -67,10 +78,13 @@ export default function BrowseMyEvent() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {events.map((event, index) => (
                 <Eventelement key={index} event={event}>
-                    <div className="flex justify-between items-center w-full">
-                        <div>
+                    <div className="flex flex-wrap justify-between items-center w-full gap-2">
+                        <div className={"flex gap-2 items-center"}>
                             <Button onClick={() => router.push(`/events/create/${event.id}`)}>
-                                Event bearbeiten
+                                <Settings/> Bearbeiten
+                            </Button>
+                            <Button onClick={() => handleAddFriend(event)}>
+                                <UserPlus/> Hinzufügen
                             </Button>
                         </div>
                         <div>
@@ -78,7 +92,8 @@ export default function BrowseMyEvent() {
                                 variant="destructive"
                                 onClick={() => handleDelete(event.id)}
                             >
-                                Event löschen
+                                <Trash/>
+                                Löschen
                             </Button>
                         </div>
                     </div>
