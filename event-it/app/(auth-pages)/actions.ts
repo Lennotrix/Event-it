@@ -18,7 +18,7 @@ export const signUpAction = async (formData: FormData) => {
     return encodedRedirect(
         "error",
         `/sign-up`,
-        "Email and password are required",
+        "E-Mail und Passwort sind erforderlich",
         redirectTo
     );
   }
@@ -46,7 +46,7 @@ export const signUpAction = async (formData: FormData) => {
   return encodedRedirect(
       "success",
       `/sign-up`,
-      "Thanks for signing up! Please check your email for a verification link.",
+      "Danke fürs Anmelden! Schau in dein Postfach und bestätige deine EMail.",
       redirectTo
   );
 };
@@ -83,7 +83,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
     return encodedRedirect(
         "error",
         `/forgot-password`,
-        "Email is required",
+        "EMail ist erforderlich",
         redirectTo
     );
   }
@@ -97,7 +97,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
     return encodedRedirect(
         "error",
         `/forgot-password`,
-        "Could not reset password",
+        "Passwort konnte nicht zurückgesetzt werden",
         redirectTo
     );
   }
@@ -105,7 +105,7 @@ export const forgotPasswordAction = async (formData: FormData) => {
   return encodedRedirect(
       "success",
       `/forgot-password`,
-      "Check your email for a link to reset your password.",
+      "Schau in dein Postfach, um dein Passwort zurückzusetzen.",
       redirectTo
   );
 };
@@ -120,7 +120,7 @@ export const resetPasswordAction = async (formData: FormData) => {
     return encodedRedirect(
         "error",
         "/reset-password",
-        "Password and confirm password are required"
+        "Passwort und Bestätigung dürfen nicht leer sein"
     );
   }
 
@@ -128,7 +128,7 @@ export const resetPasswordAction = async (formData: FormData) => {
     return encodedRedirect(
         "error",
         "/reset-password",
-        "Passwords do not match"
+        "Passwörter stimmen nicht überein"
     );
   }
 
@@ -138,13 +138,13 @@ export const resetPasswordAction = async (formData: FormData) => {
     return encodedRedirect(
         "error",
         "/reset-password",
-        "Password update failed"
+        "Aktualisierung des Passworts ist fehlgeschlagen"
     );
   }
 
   return encodedRedirect(
       "success",
       "/",
-      "Password updated"
+      "Passwort aktualisiert"
   );
 };

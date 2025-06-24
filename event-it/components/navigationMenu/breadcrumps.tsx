@@ -19,9 +19,10 @@ const breadcrumbNameMap: Record<string, string> = {
     calendar: 'Kalendar',
     events: 'Events',
     settings: 'Einstellungen',
+    invitations: 'Einladungen',
 }
 
-const clickableSegments = ['events', 'me', 'create']
+const clickableSegments = ['events', 'me', 'create','invitations']
 const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 export function Breadcrumbs() {

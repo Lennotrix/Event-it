@@ -15,33 +15,33 @@ export default async function SignInPage({
 
     return (
         <AuthCard
-            title="Sign in"
+            title="Einloggen"
             description={
                 <>
-                    Dont have an account yet?
+                    Noch kein Konto?
                     <Button variant="link" asChild>
-                        <a href="/sign-up">Sign up</a>
+                        <a href="/sign-up">Konto erstellen</a>
                     </Button>
                 </>
             }
             formAction={signInAction}
-            submitLabel="Sign in"
+            submitLabel="Einloggen"
             message={message}
         >
             <Label htmlFor="email">Email</Label>
-            <Input name="email" placeholder="you@example.com" required/>
+            <Input name="email" placeholder="beispiel@email.com" required/>
 
             <div className={"flex flex-col"}>
                 <div className="flex justify-between items-center">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password">Passwort</Label>
                     <Button variant="link" asChild>
-                        <a href={"/forgot-password"}>Forgot password?</a>
+                        <a href={"/forgot-password"}>Passwort vergessen?</a>
                     </Button>
                 </div>
                 <Input
                     type="password"
                     name="password"
-                    placeholder="Your password"
+                    placeholder="Dein Passwort"
                     minLength={6}
                     required
                 />

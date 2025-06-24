@@ -142,6 +142,12 @@ const handleStatusChange = async (newStatus: 'accepted' | 'maybe' | 'declined') 
   await loadData() // 🟢 direkt neue Daten laden, ohne das Modal zu schließen
 }
 
+const statusTranslations: Record<'accepted' | 'maybe' | 'declined', string> = {
+  accepted: "Akzeptiert",
+  maybe: "Vielleicht",
+  declined: "Abgelehnt",
+}
+
 const handleAddNote = async () => {
     if (!currentUserId) return
     const supabase = createClient()
@@ -175,70 +181,70 @@ const handleAddNote = async () => {
             {/* Left: Infos + Vote */}
             <div className="w-1/3 flex flex-col h-full overflow-hidden border-r">
               {eventInfo && (
-                  <div className="p-4 border-b flex items-center space-x-4">
-                    {eventInfo.image_url && (
-                        <img
-                            src={eventInfo.image_url}
-                            alt={eventInfo.name}
-                            className="w-20 h-20 rounded-md object-cover"
-                        />
-                    )}
-                    <div>
-                      <h2 className="text-xl font-semibold text-foreground">{eventInfo.name}</h2>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(eventInfo.start_time).toLocaleDateString()} –{' '}
-                        {new Date(eventInfo.start_time).toLocaleTimeString()}
-                      </p>
-                    </div>
+                <div className="p-4 border-b flex items-center space-x-4">
+                  {eventInfo.image_url && (
+                    <img
+                      src={eventInfo.image_url}
+                      alt={eventInfo.name}
+                      className="w-20 h-20 rounded-md object-cover"
+                    />
+                  )}
+                  <div>
+                    <h2 className="text-xl font-semibold text-foreground">{eventInfo.name}</h2>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date(eventInfo.start_time).toLocaleDateString()} –{' '}
+                      {new Date(eventInfo.start_time).toLocaleTimeString()}
+                    </p>
                   </div>
+                </div>
               )}
 
               {currentUserId && (
-                  <div className="p-4 border-b flex gap-2">
-                    {(['accepted', 'maybe', 'declined'] as const).map((status) => (
-                        <Button
-                            key={status}
-                            variant="outline"
-                            onClick={() => handleStatusChange(status)}
-                            className={inviteData[currentUserId]?.status === status ? "border-2 border-primary" : ""}
-                        >
-                          {status.charAt(0).toUpperCase() + status.slice(1)}
-                        </Button>
-                    ))}
-                  </div>
+                <div className="p-4 border-b flex gap-2">
+                  {(['accepted', 'maybe', 'declined'] as const).map((status) => (
+                    <Button
+                      key={status}
+                      variant="outline"
+                      onClick={() => handleStatusChange(status)}
+                      className={inviteData[currentUserId]?.status === status ? "border-2 border-primary" : ""}
+                    >
+                      {statusTranslations[status]}
+                    </Button>
+                  ))}
+                </div>
               )}
 
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {(['accepted', 'maybe', 'declined'] as const).map(status => {
                   const track = 'bg-muted'
                   const fill = status === 'accepted'
-                      ? 'bg-green-500 dark:bg-green-400'
-                      : status === 'maybe'
-                          ? 'bg-yellow-500 dark:bg-yellow-400'
-                          : 'bg-red-500 dark:bg-red-400'
+                    ? 'bg-green-500 dark:bg-green-400'
+                    : status === 'maybe'
+                      ? 'bg-yellow-500 dark:bg-yellow-400'
+                      : 'bg-red-500 dark:bg-red-400'
                   const tick = status === 'accepted'
-                      ? 'bg-green-700 dark:bg-green-600'
-                      : status === 'maybe'
-                          ? 'bg-yellow-700 dark:bg-yellow-600'
-                          : 'bg-red-700 dark:bg-red-600'
+                    ? 'bg-green-700 dark:bg-green-600'
+                    : status === 'maybe'
+                      ? 'bg-yellow-700 dark:bg-yellow-600'
+                      : 'bg-red-700 dark:bg-red-600'
                   const count = counts[status]
                   const widthPct = (count / maxCount) * 100
                   return (
-                      <div key={status}>
-                        <div className={`h-12 w-full rounded-full relative overflow-hidden ${track}`}>
-                          <div className={`${fill} h-full rounded-full`} style={{width: `${widthPct}%`}}/>
-                          {Array.from({length: count}).map((_, i) => (
-                              <div
-                                  key={i}
-                                  className={`${tick} absolute w-0.5 h-full`}
-                                  style={{left: `${((i + 1) / (count + 1)) * 100}%`}}
-                              />
-                          ))}
-                        </div>
-                        <p className="text-sm text-muted-foreground mt-1 capitalize">
-                          {status}: {count}
-                        </p>
+                    <div key={status}>
+                      <div className={`h-12 w-full rounded-full relative overflow-hidden ${track}`}>
+                        <div className={`${fill} h-full rounded-full`} style={{ width: `${widthPct}%` }} />
+                        {Array.from({ length: count }).map((_, i) => (
+                          <div
+                            key={i}
+                            className={`${tick} absolute w-0.5 h-full`}
+                            style={{ left: `${((i + 1) / (count + 1)) * 100}%` }}
+                          />
+                        ))}
                       </div>
+                      <p className="text-sm text-muted-foreground mt-1 capitalize">
+                        {statusTranslations[status]}: {count}
+                      </p>
+                    </div>
                   )
                 })}
               </div>
